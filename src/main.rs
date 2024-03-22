@@ -19,6 +19,7 @@ fn main() {
         .add_systems(Startup, add_tiles)
         .add_systems(Startup, init_ui)
         .add_systems(Update, draw_tiles)
+        .add_systems(Update, update_ui)
         .run();
 }
 
@@ -87,26 +88,28 @@ fn init_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ..default()
                 })
                 .with_children(|parent| {
-                    parent.spawn(
-                        (
-                            ResourceUi,
-                            TextBundle::from_section(
-                                "Text Example\nlol",
-                                TextStyle {
-                                    font_size: 20.0,
-                                    ..default()
-                                },
-                            )
-                            .with_style(Style {
-                                margin: UiRect::all(Val::Px(5.)),
+                    parent.spawn((
+                        ResourceUi,
+                        TextBundle::from_section(
+                            "Text Example\nlol",
+                            TextStyle {
+                                font_size: 20.0,
                                 ..default()
-                            }),
-                            // Because this is a distinct label widget and
-                            // not button/list item text, this is necessary
-                            // for accessibility to treat the text accordingly.
-                            Label,
-                        ),
-                    );
+                            },
+                        )
+                        .with_style(Style {
+                            margin: UiRect::all(Val::Px(5.)),
+                            ..default()
+                        }),
+                        Label,
+                    ));
                 });
         });
+}
+
+fn update_ui(mut query: Query<&mut Text, With<ResourceUi>>) {
+    for mut text in query.iter_mut() {
+        // Update the text
+        text.sections[0].value = "New Text".to_string();
+    }
 }
