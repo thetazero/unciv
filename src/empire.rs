@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 
 #[derive(Component)]
-struct Empire;
+struct Empire {
+    pub tiles: Vec<Tile>,
+}
 
 #[derive(Component)]
 pub struct Inventory {

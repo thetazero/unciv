@@ -2,6 +2,7 @@ use bevy::{
     prelude::*,
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
+use colors::dark_hue;
 
 mod tile;
 use crate::tile::Tile;
@@ -32,18 +33,18 @@ fn add_tiles(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    let dark_green: Handle<ColorMaterial> = materials.add(dark_hue(0.4));
+    let square: Handle<Mesh> = meshes.add(Rectangle::new(50.0, 50.0));
+
     let x_count = 10;
     let y_count = 10;
     for x in 0..x_count {
         for y in 0..y_count {
-            let square = Mesh2dHandle(meshes.add(Rectangle::new(50.0, 50.0)));
-            let color: Color = bright_hue(((x + y) % x_count) as f32 / (x_count) as f32);
-
             commands.spawn((
                 Tile { x, y },
                 MaterialMesh2dBundle {
-                    mesh: square,
-                    material: materials.add(color),
+                    mesh: Mesh2dHandle(square.clone()),
+                    material: dark_green.clone(),
                     transform: Transform::from_xyz(
                         // Distribute shapes from -X_EXTENT to +X_EXTENT.
                         distribute(x, x_count, X_EXTENT),
@@ -57,7 +58,21 @@ fn add_tiles(
     }
 }
 
-fn draw_tiles(query: Query<&Tile>) {}
+fn draw_tiles(
+    mut commands: Commands,
+    query: Query<(Entity, &Tile)>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
+
+    for (entity, tile) in query.iter() {
+        // transform.translation.x += 0.2;
+        // let color_mat = materials.get_mut(color_handle).unwrap();
+        if (tile.x + tile.y) % 2 == 0 {
+            commands.entity(entity).insert(empire_red.clone());
+        }
+    }
+}
 
 const X_EXTENT: f32 = 600.;
 
