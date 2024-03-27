@@ -69,15 +69,14 @@ fn add_tiles(mut commands: Commands, tile_resources: Res<TileResources>) {
 fn add_empires(
     mut commands: Commands,
     query: Query<(Entity, &Tile)>,
-    tile_resources: Res<TileResources>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    const number_of_empires: i64 = 4;
+    const NUMBER_OF_EMPIRES: i64 = 4;
 
     let mut empire_data = vec![];
 
-    for i in 0..number_of_empires {
-        let color = materials.add(bright_hue(i as f32 / number_of_empires as f32));
+    for i in 0..NUMBER_OF_EMPIRES {
+        let color = materials.add(bright_hue(i as f32 / NUMBER_OF_EMPIRES as f32));
         let empire = commands
             .spawn((
                 Empire {
@@ -93,7 +92,7 @@ fn add_empires(
     }
 
     let mut empire_idx = 0;
-    for (entity, tile) in query.iter() {
+    for (entity, _tile) in query.iter() {
         if fastrand::f32() < 1.0 / 10.0 {
             let (empire, color) = &empire_data[empire_idx];
 
@@ -101,28 +100,11 @@ fn add_empires(
             commands.entity(entity).insert(color.clone());
 
             empire_idx += 1;
-            if (empire_idx as i64) >= number_of_empires {
+            if (empire_idx as i64) >= NUMBER_OF_EMPIRES {
                 break;
             }
         }
     }
-    // let empire = commands
-    //     .spawn((
-    //         Empire { id: 0 },
-    //         TransformBundle::default(),
-    //         InheritedVisibility::default(),
-    //     ))
-    //     .id();
-
-    // for (entity, tile) in query.iter() {
-    //     if (tile.x + tile.y) % 2 == 0 {
-    //         // commands.entity(entity).despawn();
-    //         commands.entity(empire).push_children(&[entity]);
-    //         commands
-    //             .entity(entity)
-    //             .insert(tile_resources.empire_red.clone());
-    //     }
-    // }
 }
 
 const X_EXTENT: f32 = 600.;
