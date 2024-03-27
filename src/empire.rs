@@ -3,6 +3,7 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct Empire {
     pub id: i32,
+    pub color: Handle<ColorMaterial>,
 }
 
 #[derive(Component)]

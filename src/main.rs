@@ -2,6 +2,9 @@ use bevy::{
     prelude::*,
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
+
+use fastrand;
+
 use colors::dark_hue;
 
 mod tile;
@@ -67,24 +70,59 @@ fn add_empires(
     mut commands: Commands,
     query: Query<(Entity, &Tile)>,
     tile_resources: Res<TileResources>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let empire = commands
-        .spawn((
-            Empire { id: 0 },
-            TransformBundle::default(),
-            InheritedVisibility::default(),
-        ))
-        .id();
+    const number_of_empires: i64 = 4;
 
+    let mut empire_data = vec![];
+
+    for i in 0..number_of_empires {
+        let color = materials.add(bright_hue(i as f32 / number_of_empires as f32));
+        let empire = commands
+            .spawn((
+                Empire {
+                    id: i as i32,
+                    color: color.clone(),
+                },
+                TransformBundle::default(),
+                InheritedVisibility::default(),
+            ))
+            .id();
+
+        empire_data.push((empire, color));
+    }
+
+    let mut empire_idx = 0;
     for (entity, tile) in query.iter() {
-        if (tile.x + tile.y) % 2 == 0 {
-            // commands.entity(entity).despawn();
-            commands.entity(empire).push_children(&[entity]);
-            commands
-                .entity(entity)
-                .insert(tile_resources.empire_red.clone());
+        if fastrand::f32() < 1.0 / 10.0 {
+            let (empire, color) = &empire_data[empire_idx];
+
+            commands.entity(*empire).push_children(&[entity]);
+            commands.entity(entity).insert(color.clone());
+
+            empire_idx += 1;
+            if (empire_idx as i64) >= number_of_empires {
+                break;
+            }
         }
     }
+    // let empire = commands
+    //     .spawn((
+    //         Empire { id: 0 },
+    //         TransformBundle::default(),
+    //         InheritedVisibility::default(),
+    //     ))
+    //     .id();
+
+    // for (entity, tile) in query.iter() {
+    //     if (tile.x + tile.y) % 2 == 0 {
+    //         // commands.entity(entity).despawn();
+    //         commands.entity(empire).push_children(&[entity]);
+    //         commands
+    //             .entity(entity)
+    //             .insert(tile_resources.empire_red.clone());
+    //     }
+    // }
 }
 
 const X_EXTENT: f32 = 600.;
