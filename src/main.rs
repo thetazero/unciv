@@ -5,7 +5,7 @@ use bevy::{
 use colors::dark_hue;
 
 mod tile;
-use crate::tile::{Tile, TileResources, create_tile_resources};
+use crate::tile::{create_tile_resources, Tile, TileResources};
 
 mod colors;
 use crate::colors::{bright_hue, normal_hue};
@@ -21,9 +21,8 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_systems(
             Startup,
-            ((setup, add_resources), (add_tiles, add_empires, init_ui)).chain(),
+            ((setup, add_resources), add_tiles, (add_empires, init_ui)).chain(),
         )
-        .add_systems(Update, draw_tiles)
         .add_systems(Update, update_ui)
         .run();
 }
@@ -34,8 +33,8 @@ fn distribute(i: i32, count: i32, extent: f32) -> f32 {
 
 fn add_resources(
     mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    mut meshes: ResMut<Assets<Mesh>>,
+    materials: ResMut<Assets<ColorMaterial>>,
+    meshes: ResMut<Assets<Mesh>>,
 ) {
     commands.insert_resource(create_tile_resources(materials, meshes));
 }
@@ -45,7 +44,7 @@ fn add_tiles(mut commands: Commands, tile_resources: Res<TileResources>) {
     let y_count = 10;
     for x in 0..x_count {
         for y in 0..y_count {
-            commands.spawn((
+            let tile_bundle = (
                 Tile { x, y },
                 MaterialMesh2dBundle {
                     mesh: Mesh2dHandle(tile_resources.square.clone()),
@@ -58,30 +57,32 @@ fn add_tiles(mut commands: Commands, tile_resources: Res<TileResources>) {
                     ),
                     ..default()
                 },
-            ));
+            );
+            commands.spawn(tile_bundle);
         }
     }
 }
 
-fn add_empires(mut commands: Commands) {
-    let empire = commands.spawn(Empire {}).id();
-
-    let tile1 = commands.spawn(Tile { x: 0, y: 0 }).id();
-    let tile2 = commands.spawn(Tile { x: 3, y: 2 }).id();
-
-    commands.entity(empire).push_children(&[tile1, tile2]);
-}
-
-fn draw_tiles(
+fn add_empires(
     mut commands: Commands,
     query: Query<(Entity, &Tile)>,
     tile_resources: Res<TileResources>,
 ) {
+    let empire = commands
+        .spawn((
+            Empire { id: 0 },
+            TransformBundle::default(),
+            InheritedVisibility::default(),
+        ))
+        .id();
+
     for (entity, tile) in query.iter() {
-        // transform.translation.x += 0.2;
-        // let color_mat = materials.get_mut(color_handle).unwrap();
         if (tile.x + tile.y) % 2 == 0 {
-            commands.entity(entity).insert(tile_resources.empire_red.clone());
+            // commands.entity(entity).despawn();
+            commands.entity(empire).push_children(&[entity]);
+            commands
+                .entity(entity)
+                .insert(tile_resources.empire_red.clone());
         }
     }
 }
@@ -92,7 +93,7 @@ fn setup(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
-fn init_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn init_ui(mut commands: Commands) {
     commands
         .spawn(NodeBundle {
             style: Style {

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct Empire {
-
+    pub id: i32,
 }
 
 #[derive(Component)]
