@@ -13,12 +13,16 @@ use crate::colors::{bright_hue, normal_hue};
 mod ui;
 use crate::ui::ResourceUi;
 
+mod empire;
+use crate::empire::Empire;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_systems(Startup, setup)
-        .add_systems(Startup, add_tiles)
-        .add_systems(Startup, init_ui)
+        .add_systems(
+            Startup,
+            ((setup, add_resources), (add_tiles, add_empires, init_ui)).chain(),
+        )
         .add_systems(Update, draw_tiles)
         .add_systems(Update, update_ui)
         .run();
@@ -28,14 +32,30 @@ fn distribute(i: i32, count: i32, extent: f32) -> f32 {
     -extent / 2. + i as f32 / (count - 1) as f32 * extent
 }
 
-fn add_tiles(
+#[derive(Resource)]
+struct TileResources {
+    dark_green: Handle<ColorMaterial>,
+    empire_red: Handle<ColorMaterial>,
+    square: Handle<Mesh>,
+}
+
+fn add_resources(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
 ) {
     let dark_green: Handle<ColorMaterial> = materials.add(dark_hue(0.4));
+    let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
     let square: Handle<Mesh> = meshes.add(Rectangle::new(50.0, 50.0));
 
+    commands.insert_resource(TileResources {
+        dark_green,
+        empire_red,
+        square,
+    });
+}
+
+fn add_tiles(mut commands: Commands, tile_resources: Res<TileResources>) {
     let x_count = 10;
     let y_count = 10;
     for x in 0..x_count {
@@ -43,8 +63,8 @@ fn add_tiles(
             commands.spawn((
                 Tile { x, y },
                 MaterialMesh2dBundle {
-                    mesh: Mesh2dHandle(square.clone()),
-                    material: dark_green.clone(),
+                    mesh: Mesh2dHandle(tile_resources.square.clone()),
+                    material: tile_resources.dark_green.clone(),
                     transform: Transform::from_xyz(
                         // Distribute shapes from -X_EXTENT to +X_EXTENT.
                         distribute(x, x_count, X_EXTENT),
@@ -58,18 +78,25 @@ fn add_tiles(
     }
 }
 
+fn add_empires(mut commands: Commands) {
+    let empire = commands.spawn(Empire {}).id();
+
+    let tile1 = commands.spawn(Tile { x: 0, y: 0 }).id();
+    let tile2 = commands.spawn(Tile { x: 3, y: 2 }).id();
+
+    commands.entity(empire).push_children(&[tile1, tile2]);
+}
+
 fn draw_tiles(
     mut commands: Commands,
     query: Query<(Entity, &Tile)>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    tile_resources: Res<TileResources>,
 ) {
-    let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
-
     for (entity, tile) in query.iter() {
         // transform.translation.x += 0.2;
         // let color_mat = materials.get_mut(color_handle).unwrap();
         if (tile.x + tile.y) % 2 == 0 {
-            commands.entity(entity).insert(empire_red.clone());
+            commands.entity(entity).insert(tile_resources.empire_red.clone());
         }
     }
 }
