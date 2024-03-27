@@ -5,6 +5,7 @@ use crate::colors::dark_hue;
 pub struct Tile {
     pub x: i32,
     pub y: i32,
+    pub neighbors: Vec<Entity>,
 }
 
 #[derive(Resource)]

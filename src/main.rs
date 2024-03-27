@@ -4,6 +4,7 @@ use bevy::{
 };
 
 use fastrand;
+use std::collections::HashMap;
 
 use colors::dark_hue;
 
@@ -24,7 +25,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_systems(
             Startup,
-            ((setup, add_resources), add_tiles, (add_empires, init_ui)).chain(),
+            ((setup, add_resources), add_tiles, link_tiles, (add_empires, init_ui)).chain(),
         )
         .add_systems(Update, update_ui)
         .run();
@@ -45,10 +46,15 @@ fn add_resources(
 fn add_tiles(mut commands: Commands, tile_resources: Res<TileResources>) {
     let x_count = 10;
     let y_count = 10;
+
     for x in 0..x_count {
         for y in 0..y_count {
             let tile_bundle = (
-                Tile { x, y },
+                Tile {
+                    x,
+                    y,
+                    neighbors: vec![],
+                },
                 MaterialMesh2dBundle {
                     mesh: Mesh2dHandle(tile_resources.square.clone()),
                     material: tile_resources.dark_green.clone(),
@@ -62,6 +68,28 @@ fn add_tiles(mut commands: Commands, tile_resources: Res<TileResources>) {
                 },
             );
             commands.spawn(tile_bundle);
+        }
+    }
+}
+
+fn link_tiles(mut query: Query<(Entity, &mut Tile)>) {
+    let mut tile_ids: HashMap<(i32, i32), Entity> = HashMap::new();
+    for (entity, tile) in query.iter_mut() {
+        tile_ids.insert((tile.x, tile.y), entity);
+    }
+
+    for (_, mut tile) in query.iter_mut() {
+        let neighbors = [
+            (tile.x - 1, tile.y),
+            (tile.x + 1, tile.y),
+            (tile.x, tile.y - 1),
+            (tile.x, tile.y + 1),
+        ];
+
+        for (x, y) in neighbors.iter() {
+            if let Some(neighbor) = tile_ids.get(&(*x, *y)) {
+                tile.neighbors.push(*neighbor);
+            }
         }
     }
 }
@@ -159,5 +187,29 @@ fn update_ui(mut query: Query<&mut Text, With<ResourceUi>>) {
     for mut text in query.iter_mut() {
         // Update the text
         text.sections[0].value = "New Text".to_string();
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use bevy::prelude::*;
+    #[test]
+    fn spawns_right_number_of_empires() {
+        let mut app = App::new();
+
+        app.add_systems(
+            Startup,
+            (crate::add_resources, crate::add_tiles, crate::add_empires).chain(),
+        );
+
+        app.update();
+
+        assert_eq!(
+            app.world
+                .query::<&crate::empire::Empire>()
+                .iter(&app.world)
+                .len(),
+            4
+        );
     }
 }
