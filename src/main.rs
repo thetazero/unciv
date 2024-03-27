@@ -5,7 +5,7 @@ use bevy::{
 use colors::dark_hue;
 
 mod tile;
-use crate::tile::Tile;
+use crate::tile::{Tile, TileResources, create_tile_resources};
 
 mod colors;
 use crate::colors::{bright_hue, normal_hue};
@@ -32,27 +32,12 @@ fn distribute(i: i32, count: i32, extent: f32) -> f32 {
     -extent / 2. + i as f32 / (count - 1) as f32 * extent
 }
 
-#[derive(Resource)]
-struct TileResources {
-    dark_green: Handle<ColorMaterial>,
-    empire_red: Handle<ColorMaterial>,
-    square: Handle<Mesh>,
-}
-
 fn add_resources(
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    let dark_green: Handle<ColorMaterial> = materials.add(dark_hue(0.4));
-    let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
-    let square: Handle<Mesh> = meshes.add(Rectangle::new(50.0, 50.0));
-
-    commands.insert_resource(TileResources {
-        dark_green,
-        empire_red,
-        square,
-    });
+    commands.insert_resource(create_tile_resources(materials, meshes));
 }
 
 fn add_tiles(mut commands: Commands, tile_resources: Res<TileResources>) {
