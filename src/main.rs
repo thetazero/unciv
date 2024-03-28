@@ -2,10 +2,11 @@ use bevy::{
     prelude::*,
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
+use bevy_mod_picking::prelude::*;
 
+use core::iter::zip;
 use rand::seq::IteratorRandom;
 use std::collections::HashMap;
-use core::iter::zip;
 
 use colors::dark_hue;
 
@@ -22,20 +23,25 @@ mod empire;
 use crate::empire::Empire;
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_systems(
-            Startup,
-            (
-                (setup, add_resources),
-                add_tiles,
-                link_tiles,
-                (add_empires, init_ui),
-            )
-                .chain(),
+    let mut app = App::new();
+
+    app.add_plugins(DefaultPlugins.set(low_latency_window_plugin()))
+        .add_plugins(DefaultPickingPlugins)
+        .insert_resource(DebugPickingMode::Normal);
+
+    app.add_systems(
+        Startup,
+        (
+            (setup, add_resources),
+            add_tiles,
+            link_tiles,
+            (add_empires, init_ui),
         )
-        .add_systems(Update, update_ui)
-        .run();
+            .chain(),
+    )
+    .add_systems(Update, update_ui);
+
+    app.run();
 }
 
 fn distribute(i: i32, count: i32, extent: f32) -> f32 {
@@ -66,13 +72,21 @@ fn add_tiles(mut commands: Commands, tile_resources: Res<TileResources>) {
                     mesh: Mesh2dHandle(tile_resources.square.clone()),
                     material: tile_resources.dark_green.clone(),
                     transform: Transform::from_xyz(
-                        // Distribute shapes from -X_EXTENT to +X_EXTENT.
                         distribute(x, x_count, X_EXTENT),
                         distribute(y, x_count, X_EXTENT),
                         0.0,
                     ),
                     ..default()
                 },
+                PickableBundle::default(),
+                // On::<Pointer<Click>>::target_component_mut::<Transform>(|_click, transform| {
+                //     println!("Clicked tile at {:?}", transform.translation);
+                //     transform.translation.y += 10.0;
+                // }),
+                On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
+                    transform.translation.x += drag.delta.x; // Make the square follow the mouse
+                    transform.translation.y -= drag.delta.y;
+                }),
             );
             commands.spawn(tile_bundle);
         }
@@ -132,8 +146,8 @@ fn add_empires(
         .choose_multiple(&mut rng, NUMBER_OF_EMPIRES as usize);
 
     for ((entity, _tile), (empire, color)) in zip(spawn_tiles, empire_data) {
-            commands.entity(empire).push_children(&[entity]);
-            commands.entity(entity).insert(color.clone());
+        commands.entity(empire).push_children(&[entity]);
+        commands.entity(entity).insert(color.clone());
     }
 }
 
@@ -147,7 +161,7 @@ fn init_ui(mut commands: Commands) {
     commands
         .spawn(NodeBundle {
             style: Style {
-                width: Val::Percent(100.0),
+                width: Val::Percent(20.0),
                 height: Val::Percent(100.0),
                 justify_content: JustifyContent::SpaceBetween,
                 ..default()
@@ -158,7 +172,7 @@ fn init_ui(mut commands: Commands) {
             parent
                 .spawn(NodeBundle {
                     style: Style {
-                        width: Val::Px(200.),
+                        width: Val::Percent(100.0),
                         border: UiRect::all(Val::Px(2.)),
                         ..default()
                     },
