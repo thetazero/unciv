@@ -3,8 +3,9 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 
-use fastrand;
+use rand::seq::IteratorRandom;
 use std::collections::HashMap;
+use core::iter::zip;
 
 use colors::dark_hue;
 
@@ -25,7 +26,13 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_systems(
             Startup,
-            ((setup, add_resources), add_tiles, link_tiles, (add_empires, init_ui)).chain(),
+            (
+                (setup, add_resources),
+                add_tiles,
+                link_tiles,
+                (add_empires, init_ui),
+            )
+                .chain(),
         )
         .add_systems(Update, update_ui)
         .run();
@@ -119,19 +126,14 @@ fn add_empires(
         empire_data.push((empire, color));
     }
 
-    let mut empire_idx = 0;
-    for (entity, _tile) in query.iter() {
-        if fastrand::f32() < 1.0 / 10.0 {
-            let (empire, color) = &empire_data[empire_idx];
+    let mut rng = rand::thread_rng();
+    let spawn_tiles = query
+        .iter()
+        .choose_multiple(&mut rng, NUMBER_OF_EMPIRES as usize);
 
-            commands.entity(*empire).push_children(&[entity]);
+    for ((entity, _tile), (empire, color)) in zip(spawn_tiles, empire_data) {
+            commands.entity(empire).push_children(&[entity]);
             commands.entity(entity).insert(color.clone());
-
-            empire_idx += 1;
-            if (empire_idx as i64) >= NUMBER_OF_EMPIRES {
-                break;
-            }
-        }
     }
 }
 
