@@ -22,7 +22,7 @@ pub fn spawn(
     query: Query<(Entity, &Tile)>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    const NUMBER_OF_EMPIRES: i64 = 4;
+    const NUMBER_OF_EMPIRES: i64 = 10;
 
     let mut empire_data = vec![];
 

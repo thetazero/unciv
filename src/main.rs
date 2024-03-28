@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
+};
 use bevy_mod_picking::prelude::*;
 
 mod colors;
@@ -36,8 +39,29 @@ fn add_resources(
     commands.insert_resource(tile::create_tile_resources(materials, meshes));
 }
 
-fn setup(mut commands: Commands) {
+fn setup(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+) {
     commands.spawn(Camera2dBundle::default());
+
+    let _background_plane: Handle<Mesh> = meshes.add(Rectangle::new(10000.0, 10000.0));
+    let _ocean_dark: Handle<ColorMaterial> = materials.add(Color::hsl(200.0, 0.3, 0.07));
+
+    // commands.spawn((
+    //     MaterialMesh2dBundle {
+    //         mesh: Mesh2dHandle(background_plane),
+    //         transform: Transform::from_xyz(0.0, 0.0, -1.0),
+    //         material: ocean_dark,
+    //         ..default()
+    //     },
+    //     PickableBundle::default(),
+    //     On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
+    //         transform.translation.x += drag.delta.x; // Make the square follow the mouse
+    //         transform.translation.y -= drag.delta.y;
+    //     }),
+    // ));
 }
 
 #[cfg(test)]
