@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_mod_picking::prelude::*;
 
 #[derive(Component)]
 pub struct ResourceUi;
@@ -70,9 +71,25 @@ pub fn init(mut commands: Commands) {
         });
 }
 
-pub fn update(mut query: Query<&mut Text, With<ResourceUi>>) {
+pub fn update(
+    mut query: Query<&mut Text, With<ResourceUi>>,
+    mut ev_inspect: EventReader<InspectEvent>,
+) {
     for mut text in query.iter_mut() {
         // Update the text
         text.sections[0].value = "New Text".to_string();
+    }
+
+    for ev in ev_inspect.read() {
+        println!("Inspecting tile {:?}", ev.0);
+    }
+}
+
+#[derive(Event)]
+pub struct InspectEvent(Entity);
+
+impl From<ListenerInput<Pointer<Click>>> for InspectEvent {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        InspectEvent(event.target)
     }
 }

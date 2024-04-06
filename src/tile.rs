@@ -5,6 +5,7 @@ use bevy::{
 use bevy_mod_picking::prelude::*;
 
 use crate::colors::dark_hue;
+use crate::ui;
 
 use std::collections::HashMap;
 
@@ -70,6 +71,7 @@ pub fn spawn(mut commands: Commands, tile_resources: Res<TileResources>) {
                     transform.translation.x += drag.delta.x; // Make the square follow the mouse
                     transform.translation.y -= drag.delta.y;
                 }),
+                On::<Pointer<Click>>::send_event::<ui::InspectEvent>(),
             );
             commands.spawn(tile_bundle);
         }

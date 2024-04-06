@@ -26,7 +26,9 @@ fn main() {
         )
             .chain(),
     )
-    .add_systems(Update, ui::update);
+    .add_systems(Update, (ui::update).chain());
+
+    app.add_event::<ui::InspectEvent>();
 
     app.run();
 }
