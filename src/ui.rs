@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
+use crate::tile;
+
 #[derive(Component)]
 pub struct ResourceUi;
 
@@ -44,7 +46,12 @@ pub fn init(mut commands: Commands) {
                     ));
                 });
         });
+}
 
+#[derive(Component)]
+pub struct InspectorTitle;
+
+pub fn init_inspector(mut commands: Commands) {
     commands
         .spawn(NodeBundle {
             style: Style {
@@ -59,15 +66,33 @@ pub fn init(mut commands: Commands) {
             ..default()
         })
         .with_children(|parent| {
-            parent.spawn(NodeBundle {
-                style: Style {
-                    width: Val::Percent(100.0),
-                    border: UiRect::all(Val::Px(2.)),
+            parent
+                .spawn(NodeBundle {
+                    style: Style {
+                        width: Val::Percent(100.0),
+                        border: UiRect::all(Val::Px(2.)),
+                        ..default()
+                    },
+                    background_color: Color::rgb(0.08, 0.08, 0.08).into(),
                     ..default()
-                },
-                background_color: Color::rgb(0.08, 0.08, 0.08).into(),
-                ..default()
-            });
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        InspectorTitle,
+                        TextBundle::from_section(
+                            "Text Example\nlol",
+                            TextStyle {
+                                font_size: 20.0,
+                                ..default()
+                            },
+                        )
+                        .with_style(Style {
+                            margin: UiRect::all(Val::Px(5.)),
+                            ..default()
+                        }),
+                        Label,
+                    ));
+                });
         });
 }
 
@@ -79,9 +104,21 @@ pub fn update(
         // Update the text
         text.sections[0].value = "New Text".to_string();
     }
+}
 
+pub fn update_inspector(
+    mut query: Query<&mut Text, With<InspectorTitle>>,
+    tile_query: Query<(Entity, &tile::Tile)>,
+    mut ev_inspect: EventReader<InspectEvent>,
+) {
     for ev in ev_inspect.read() {
-        println!("Inspecting tile {:?}", ev.0);
+        for mut text in query.iter_mut() {
+            // Update the text
+            let entity = ev.0;
+            let (_, tile) = tile_query.get(entity).unwrap();
+            text.sections[0].value = format!("Tile: ({}, {})", tile.x, tile.y);
+            println!("Inspecting tile ({}, {})", tile.x, tile.y);
+        }
     }
 }
 

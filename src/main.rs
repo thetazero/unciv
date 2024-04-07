@@ -22,11 +22,11 @@ fn main() {
             (setup, add_resources),
             tile::spawn,
             tile::link,
-            (empire::spawn, ui::init),
+            (empire::spawn, ui::init, ui::init_inspector),
         )
             .chain(),
     )
-    .add_systems(Update, (ui::update).chain());
+    .add_systems(Update, ((ui::update, ui::update_inspector)).chain());
 
     app.add_event::<ui::InspectEvent>();
 
