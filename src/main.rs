@@ -102,12 +102,19 @@ fn handle_keyboard_input(
 #[cfg(test)]
 mod test {
     use bevy::prelude::*;
+    // #[test]
+    // fn basic_ecs () {
+    //     let mut app = App::new();
+
+    //     app.update();
+    // }
+
     #[test]
     fn spawns_right_number_of_empires() {
         let mut app = App::new();
 
         app.add_systems(
-            Startup,
+            Update,
             (
                 crate::add_resources,
                 crate::tile::spawn,
