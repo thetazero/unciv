@@ -1,7 +1,4 @@
-use bevy::{
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-};
+use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 mod colors;
@@ -26,7 +23,10 @@ fn main() {
         )
             .chain(),
     )
-    .add_systems(Update, ((ui::update, ui::update_inspector)).chain());
+    .add_systems(
+        Update,
+        ((handle_keyboard_input, ui::update, ui::update_inspector)).chain(),
+    );
 
     app.add_event::<ui::InspectEvent>();
 
@@ -64,6 +64,37 @@ fn setup(
     //         transform.translation.y -= drag.delta.y;
     //     }),
     // ));
+}
+
+fn handle_keyboard_input(
+    mut camera: Query<&mut Transform, With<Camera2d>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        std::process::exit(0);
+    }
+
+    let speed = 2.0;
+    let mut deltaX = 0.;
+    let mut deltaY = 0.;
+    if keyboard_input.pressed(KeyCode::KeyW) {
+        deltaY += speed;
+    }
+    if keyboard_input.pressed(KeyCode::KeyS) {
+        deltaY -= speed;
+    }
+
+    if keyboard_input.pressed(KeyCode::KeyA) {
+        deltaX -= speed;
+    }
+    if keyboard_input.pressed(KeyCode::KeyD) {
+        deltaX += speed;
+    }
+
+    for mut transform in camera.iter_mut() {
+        transform.translation.y += deltaY;
+        transform.translation.x += deltaX;
+    }
 }
 
 #[cfg(test)]
