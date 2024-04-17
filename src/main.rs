@@ -5,6 +5,9 @@ mod colors;
 mod empire;
 mod tile;
 mod ui;
+mod config;
+
+use crate::config::CONFIG;
 
 fn main() {
     let mut app = App::new();
@@ -70,30 +73,29 @@ fn handle_keyboard_input(
     mut camera: Query<&mut Transform, With<Camera2d>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
 ) {
-    if keyboard_input.just_pressed(KeyCode::Escape) {
+    if keyboard_input.just_pressed(CONFIG.quit_key) {
         std::process::exit(0);
     }
 
-    let speed = 2.0;
-    let mut deltaX = 0.;
-    let mut deltaY = 0.;
+    let mut delta_x = 0.;
+    let mut delta_y = 0.;
     if keyboard_input.pressed(KeyCode::KeyW) {
-        deltaY += speed;
+        delta_y += CONFIG.camera_speed;
     }
     if keyboard_input.pressed(KeyCode::KeyS) {
-        deltaY -= speed;
+        delta_y -= CONFIG.camera_speed;
     }
 
     if keyboard_input.pressed(KeyCode::KeyA) {
-        deltaX -= speed;
+        delta_x -= CONFIG.camera_speed;
     }
     if keyboard_input.pressed(KeyCode::KeyD) {
-        deltaX += speed;
+        delta_x += CONFIG.camera_speed;
     }
 
     for mut transform in camera.iter_mut() {
-        transform.translation.y += deltaY;
-        transform.translation.x += deltaX;
+        transform.translation.y += delta_y;
+        transform.translation.x += delta_x;
     }
 }
 
