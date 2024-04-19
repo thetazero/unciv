@@ -32,8 +32,8 @@ impl Distribution<TileType> for Standard {
 
 fn tile_material(kind: &TileType, tile_resources: &TileResources) -> Handle<ColorMaterial> {
     match kind {
-        TileType::Forest => tile_resources.dark_green.clone(),
-        TileType::Mountain => tile_resources.forest.clone(),
+        TileType::Forest => tile_resources.forest.clone(),
+        TileType::Mountain => tile_resources.mountain.clone(),
         TileType::Water => tile_resources.water.clone(),
     }
 }
@@ -48,10 +48,10 @@ pub struct Tile {
 
 #[derive(Resource)]
 pub struct TileResources {
-    pub dark_green: Handle<ColorMaterial>,
-    pub empire_red: Handle<ColorMaterial>,
     pub forest: Handle<ColorMaterial>,
     pub water: Handle<ColorMaterial>,
+    pub mountain: Handle<ColorMaterial>,
+    pub empire_red: Handle<ColorMaterial>,
     pub square: Handle<Mesh>,
 }
 
@@ -59,18 +59,18 @@ pub fn create_tile_resources(
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) -> TileResources {
-    let dark_green: Handle<ColorMaterial> = materials.add(dark_hue(0.4));
     let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
-    let forest = materials.add(Color::hsl(0.3, 0.5, 0.3));
+    let forest: Handle<ColorMaterial> = materials.add(dark_hue(0.4));
+    let mountain = materials.add(Color::hsl(0.3, 0.1, 0.3));
     let water = materials.add(Color::hsl(200.0, 0.3, 0.5));
 
     let square: Handle<Mesh> = meshes.add(Rectangle::new(50.0, 50.0));
 
     TileResources {
-        dark_green,
-        empire_red,
         forest,
         water,
+        mountain,
+        empire_red,
         square,
     }
 }
