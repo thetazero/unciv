@@ -4,6 +4,7 @@ use bevy_mod_picking::prelude::*;
 mod colors;
 mod config;
 mod empire;
+mod tick;
 mod tile;
 mod ui;
 
@@ -19,7 +20,7 @@ fn main() {
     app.add_systems(
         Startup,
         (
-            (setup, add_resources),
+            (setup, add_resources, tick::init_tick),
             tile::spawn,
             tile::link,
             (empire::spawn, ui::init, ui::init_inspector),
@@ -28,7 +29,12 @@ fn main() {
     )
     .add_systems(
         Update,
-        ((handle_keyboard_input, ui::update_inspector)).chain(),
+        ((
+            handle_keyboard_input,
+            ui::update_inspector,
+            tick::tick_world,
+        ))
+            .chain(),
     );
 
     app.add_event::<ui::InspectEvent>();

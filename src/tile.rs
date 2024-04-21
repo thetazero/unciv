@@ -14,27 +14,27 @@ use crate::ui;
 use std::collections::HashMap;
 
 #[derive(Clone, Copy)]
-pub enum TileType {
+pub enum TileKind {
     Forest,
     Mountain,
     Water,
 }
 
-impl Distribution<TileType> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TileType {
+impl Distribution<TileKind> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TileKind {
         match rng.gen_range(0..3) {
-            0 => TileType::Forest,
-            1 => TileType::Mountain,
-            _ => TileType::Water,
+            0 => TileKind::Forest,
+            1 => TileKind::Mountain,
+            _ => TileKind::Water,
         }
     }
 }
 
-fn tile_material(kind: &TileType, tile_resources: &TileResources) -> Handle<ColorMaterial> {
+fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<ColorMaterial> {
     match kind {
-        TileType::Forest => tile_resources.forest.clone(),
-        TileType::Mountain => tile_resources.mountain.clone(),
-        TileType::Water => tile_resources.water.clone(),
+        TileKind::Forest => tile_resources.forest.clone(),
+        TileKind::Mountain => tile_resources.mountain.clone(),
+        TileKind::Water => tile_resources.water.clone(),
     }
 }
 
@@ -42,7 +42,7 @@ fn tile_material(kind: &TileType, tile_resources: &TileResources) -> Handle<Colo
 pub struct Tile {
     pub x: i32,
     pub y: i32,
-    pub kind: TileType,
+    pub kind: TileKind,
     pub neighbors: Vec<Entity>,
     pub owner: Option<Entity>,
 }
@@ -86,7 +86,7 @@ fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<Tile> {
     let mut tiles = Vec::new();
     for x in 0..x_count {
         for y in 0..y_count {
-            let kind: TileType = rand::random();
+            let kind: TileKind = rand::random();
             tiles.push(Tile {
                 x,
                 y,
