@@ -4,10 +4,19 @@ use bevy_mod_picking::prelude::*;
 use crate::empire;
 use crate::tile;
 
+#[derive(Resource)]
+pub struct UiState {
+    pub selected_tile: Option<Entity>,
+}
+
 #[derive(Component)]
 pub struct ResourceUi;
 
 pub fn init(mut commands: Commands) {
+    commands.insert_resource(UiState {
+        selected_tile: None,
+    });
+
     commands
         .spawn(NodeBundle {
             style: Style {
@@ -100,40 +109,67 @@ pub fn init_inspector(mut commands: Commands) {
         });
 }
 
-pub fn update_inspector(
-    mut inspector_query: Query<&mut Text, With<InspectorTitle>>,
-    mut resources_inspector_query: Query<&mut Text, (With<ResourceUi>, Without<InspectorTitle>)>,
-    tile_query: Query<(Entity, &tile::Tile)>,
-    mut ev_inspect: EventReader<InspectEvent>,
-    mut empires: Query<(Entity, &empire::Empire)>,
-) {
+pub fn update_selection(mut ev_inspect: EventReader<InspectEvent>, mut ui_state: ResMut<UiState>) {
     for ev in ev_inspect.read() {
-        let entity = ev.0;
-        let (_, tile) = tile_query.get(entity).unwrap();
+        ui_state.selected_tile = Some(ev.0);
+    }
+}
 
-        for mut text in inspector_query.iter_mut() {
-            // Update the text
-            let mut string_to_display = format!("Tile: ({}, {})", tile.x, tile.y);
+pub fn update_inspector(
+    ui_state: ResMut<UiState>,
+    mut inspector_query: Query<&mut Text, With<InspectorTitle>>,
+    tile_query: Query<(Entity, &tile::Tile)>,
+    empire_query: Query<(Entity, &empire::Empire)>,
+) {
+    match ui_state.selected_tile {
+        Some(entity) => {
+            let (_, tile) = tile_query.get(entity).unwrap();
 
-            println!("Inspecting tile ({}, {})", tile.x, tile.y);
-            if let Some(empire) = tile.owner {
-                let (_, empire) = empires.get(empire).unwrap();
-                string_to_display.push_str(&format!("\nEmpire: {}", empire.id));
-            } else {
-                string_to_display.push_str("\nUnowned");
+            for mut text in inspector_query.iter_mut() {
+                let mut string_to_display = format!("Tile: ({}, {})", tile.x, tile.y);
+
+                if let Some(empire) = tile.owner {
+                    let (_, empire) = empire_query.get(empire).unwrap();
+                    string_to_display.push_str(&format!("\nEmpire: {}", empire.id));
+                } else {
+                    string_to_display.push_str("\nUnowned");
+                }
+
+                text.sections[0].value = string_to_display;
             }
-
-            text.sections[0].value = string_to_display;
         }
+        None => {
+            for mut text in inspector_query.iter_mut() {
+                text.sections[0].value = "Tile: (0, 0)\nUnowned".to_string();
+            }
+        }
+    }
+}
 
-        for mut text in resources_inspector_query.iter_mut() {
-            if let Some(empire) = tile.owner {
-                let (_, empire) = empires.get(empire).unwrap();
-                text.sections[0].value = format!(
-                    "Wood: {}\nStone: {}\nEmpire: {}",
-                    empire.inventory.wood, empire.inventory.stone, empire.id
-                );
-            } else {
+pub fn update_resource_panel(
+    ui_state: ResMut<UiState>,
+    mut resources_inspector_query: Query<&mut Text, With<ResourceUi>>,
+    tile_query: Query<(Entity, &tile::Tile)>,
+    empire_query: Query<(Entity, &empire::Empire)>,
+) {
+    match ui_state.selected_tile {
+        Some(entity) => {
+            let (_, tile) = tile_query.get(entity).unwrap();
+
+            for mut text in resources_inspector_query.iter_mut() {
+                if let Some(empire) = tile.owner {
+                    let (_, empire) = empire_query.get(empire).unwrap();
+                    text.sections[0].value = format!(
+                        "Wood: {}\nStone: {}\nEmpire: {}",
+                        empire.inventory.wood, empire.inventory.stone, empire.id
+                    );
+                } else {
+                    text.sections[0].value = "Wood: 0\nStone: 0\nUnowned".to_string();
+                }
+            }
+        }
+        None => {
+            for mut text in resources_inspector_query.iter_mut() {
                 text.sections[0].value = "Wood: 0\nStone: 0\nUnowned".to_string();
             }
         }

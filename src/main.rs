@@ -31,7 +31,8 @@ fn main() {
         Update,
         ((
             handle_keyboard_input,
-            ui::update_inspector,
+            ui::update_selection,
+            (ui::update_inspector, ui::update_resource_panel),
             tick::tick_world,
         ))
             .chain(),
