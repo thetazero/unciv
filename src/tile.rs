@@ -15,6 +15,7 @@ use crate::world_gen;
 #[derive(Clone, Copy)]
 pub enum TileKind {
     Forest,
+    Desert,
     Mountain,
     Water,
 }
@@ -24,6 +25,7 @@ fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<Colo
         TileKind::Forest => tile_resources.forest.clone(),
         TileKind::Mountain => tile_resources.mountain.clone(),
         TileKind::Water => tile_resources.water.clone(),
+        TileKind::Desert => tile_resources.desert.clone(),
     }
 }
 
@@ -39,6 +41,7 @@ pub struct Tile {
 #[derive(Resource)]
 pub struct TileResources {
     pub forest: Handle<ColorMaterial>,
+    pub desert: Handle<ColorMaterial>,
     pub water: Handle<ColorMaterial>,
     pub mountain: Handle<ColorMaterial>,
     pub empire_red: Handle<ColorMaterial>,
@@ -51,6 +54,7 @@ pub fn create_tile_resources(
 ) -> TileResources {
     let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
     let forest: Handle<ColorMaterial> = materials.add(dark_hue(0.4));
+    let desert = materials.add(Color::hsl(47., 0.29, 0.49));
     let mountain = materials.add(Color::hsl(0.3, 0.1, 0.3));
     let water = materials.add(Color::hsl(200.0, 0.3, 0.5));
 
@@ -58,6 +62,7 @@ pub fn create_tile_resources(
 
     TileResources {
         forest,
+        desert,
         water,
         mountain,
         empire_red,
