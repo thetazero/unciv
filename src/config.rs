@@ -6,7 +6,7 @@ pub struct Config {
 
 pub const fn default_config() -> Config {
     Config {
-        camera_speed: 1.5,
+        camera_speed: 200.,
         quit_key: KeyCode::CapsLock,
     }
 }

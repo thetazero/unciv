@@ -79,6 +79,7 @@ fn handle_keyboard_input(
     mut camera: Query<&mut Transform, With<Camera2d>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
+    time: Res<Time>,
 ) {
     if keyboard_input.just_pressed(CONFIG.quit_key) {
         app_exit_events.send(bevy::app::AppExit);
@@ -101,8 +102,8 @@ fn handle_keyboard_input(
     }
 
     for mut transform in camera.iter_mut() {
-        transform.translation.y += delta_y;
-        transform.translation.x += delta_x;
+        transform.translation.y += delta_y * time.delta_seconds();
+        transform.translation.x += delta_x * time.delta_seconds();
     }
 }
 
