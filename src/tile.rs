@@ -3,31 +3,20 @@ use bevy::{
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
 use bevy_mod_picking::prelude::*;
-use rand::{
-    distributions::{Distribution, Standard},
-    Rng,
-};
 
 use crate::colors::dark_hue;
+use crate::config::CONFIG;
 use crate::ui;
 
 use std::collections::HashMap;
+
+use crate::world_gen;
 
 #[derive(Clone, Copy)]
 pub enum TileKind {
     Forest,
     Mountain,
     Water,
-}
-
-impl Distribution<TileKind> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TileKind {
-        match rng.gen_range(0..3) {
-            0 => TileKind::Forest,
-            1 => TileKind::Mountain,
-            _ => TileKind::Water,
-        }
-    }
 }
 
 fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<ColorMaterial> {
@@ -80,30 +69,12 @@ fn distribute(i: i32, count: i32, extent: f32) -> f32 {
     -extent / 2. + i as f32 / (count - 1) as f32 * extent
 }
 
-const X_EXTENT: f32 = 600.;
-
-fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<Tile> {
-    let mut tiles = Vec::new();
-    for x in 0..x_count {
-        for y in 0..y_count {
-            let kind: TileKind = rand::random();
-            tiles.push(Tile {
-                x,
-                y,
-                kind: kind.clone(),
-                neighbors: vec![],
-                owner: None,
-            });
-        }
-    }
-    tiles
-}
+const X_EXTENT: f32 = 1800.;
 
 pub fn spawn(mut commands: Commands, tile_resources: Res<TileResources>) {
-    let x_count = 10;
-    let y_count = 10;
+    let (x_count, y_count) = CONFIG.world_size;
 
-    let tile_data = spawn_tile_data(x_count, y_count);
+    let tile_data = world_gen::spawn_tile_data(x_count, y_count);
 
     for tile in tile_data.iter() {
         let tile_bundle = (

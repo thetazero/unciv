@@ -7,6 +7,7 @@ mod empire;
 mod tick;
 mod tile;
 mod ui;
+mod world_gen;
 
 use crate::config::CONFIG;
 
