@@ -2,10 +2,10 @@ use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 mod colors;
+mod config;
 mod empire;
 mod tile;
 mod ui;
-mod config;
 
 use crate::config::CONFIG;
 
@@ -28,7 +28,7 @@ fn main() {
     )
     .add_systems(
         Update,
-        ((handle_keyboard_input, ui::update, ui::update_inspector)).chain(),
+        ((handle_keyboard_input, ui::update_inspector)).chain(),
     );
 
     app.add_event::<ui::InspectEvent>();
@@ -72,7 +72,7 @@ fn setup(
 fn handle_keyboard_input(
     mut camera: Query<&mut Transform, With<Camera2d>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut app_exit_events: ResMut<Events<bevy::app::AppExit>>
+    mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
 ) {
     if keyboard_input.just_pressed(CONFIG.quit_key) {
         app_exit_events.send(bevy::app::AppExit);

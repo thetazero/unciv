@@ -35,7 +35,7 @@ pub fn init(mut commands: Commands) {
                     parent.spawn((
                         ResourceUi,
                         TextBundle::from_section(
-                            "Idk",
+                            "Wood: 0\nStone: 0\nUnowned".to_string(),
                             TextStyle {
                                 font_size: 20.0,
                                 ..default()
@@ -102,18 +102,9 @@ pub fn init_inspector(mut commands: Commands) {
         });
 }
 
-pub fn update(
-    mut query: Query<&mut Text, With<ResourceUi>>,
-    mut ev_inspect: EventReader<InspectEvent>,
-) {
-    for mut text in query.iter_mut() {
-        // Update the text
-        text.sections[0].value = "New Text".to_string();
-    }
-}
-
 pub fn update_inspector(
     mut inspector_query: Query<&mut Text, With<InspectorTitle>>,
+    mut resources_inspector_query: Query<&mut Text, (With<ResourceUi>, Without<InspectorTitle>)>,
     tile_query: Query<(Entity, &tile::Tile)>,
     mut ev_inspect: EventReader<InspectEvent>,
     mut empires: Query<(Entity, &empire::Empire)>,
@@ -135,6 +126,18 @@ pub fn update_inspector(
             }
 
             text.sections[0].value = string_to_display;
+        }
+
+        for mut text in resources_inspector_query.iter_mut() {
+            if let Some(empire) = tile.owner {
+                let (_, empire) = empires.get(empire).unwrap();
+                text.sections[0].value = format!(
+                    "Wood: {}\nStone: {}\nEmpire: {}",
+                    empire.inventory.wood, empire.inventory.stone, empire.id
+                );
+            } else {
+                text.sections[0].value = "Wood: 0\nStone: 0\nUnowned".to_string();
+            }
         }
     }
 }

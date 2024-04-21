@@ -9,6 +9,7 @@ use rand::seq::IteratorRandom;
 pub struct Empire {
     pub id: i32,
     pub color: Handle<ColorMaterial>,
+    pub inventory: Inventory,
 }
 
 #[derive(Component)]
@@ -33,6 +34,7 @@ pub fn spawn(
                 Empire {
                     id: i as i32,
                     color: color.clone(),
+                    inventory: Inventory { wood: 0, stone: 0 },
                 },
                 TransformBundle::default(),
                 InheritedVisibility::default(),
