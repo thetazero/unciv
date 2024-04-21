@@ -38,7 +38,7 @@ fn tile_material(kind: &TileType, tile_resources: &TileResources) -> Handle<Colo
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Tile {
     pub x: i32,
     pub y: i32,
@@ -81,40 +81,49 @@ fn distribute(i: i32, count: i32, extent: f32) -> f32 {
 
 const X_EXTENT: f32 = 600.;
 
+fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<Tile> {
+    let mut tiles = Vec::new();
+    for x in 0..x_count {
+        for y in 0..y_count {
+            let kind: TileType = rand::random();
+            tiles.push(Tile {
+                x,
+                y,
+                kind: kind.clone(),
+                neighbors: vec![],
+            });
+        }
+    }
+    tiles
+}
+
 pub fn spawn(mut commands: Commands, tile_resources: Res<TileResources>) {
     let x_count = 10;
     let y_count = 10;
 
-    for x in 0..x_count {
-        for y in 0..y_count {
-            let kind: TileType = rand::random();
+    let tile_data = spawn_tile_data(x_count, y_count);
 
-            let tile_bundle = (
-                Tile {
-                    x,
-                    y,
-                    kind: kind.clone(),
-                    neighbors: vec![],
-                },
-                MaterialMesh2dBundle {
-                    mesh: Mesh2dHandle(tile_resources.square.clone()),
-                    material: tile_material(&kind, &tile_resources),
-                    transform: Transform::from_xyz(
-                        distribute(x, x_count, X_EXTENT),
-                        distribute(y, x_count, X_EXTENT),
-                        0.0,
-                    ),
-                    ..default()
-                },
-                PickableBundle::default(),
-                On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
-                    transform.translation.x += drag.delta.x; // Make the square follow the mouse
-                    transform.translation.y -= drag.delta.y;
-                }),
-                On::<Pointer<Click>>::send_event::<ui::InspectEvent>(),
-            );
-            commands.spawn(tile_bundle);
-        }
+    for tile in tile_data.iter() {
+        let tile_bundle = (
+            tile.clone(),
+            MaterialMesh2dBundle {
+                mesh: Mesh2dHandle(tile_resources.square.clone()),
+                material: tile_material(&tile.kind, &tile_resources),
+                transform: Transform::from_xyz(
+                    distribute(tile.x, x_count, X_EXTENT),
+                    distribute(tile.y, x_count, X_EXTENT),
+                    0.0,
+                ),
+                ..default()
+            },
+            PickableBundle::default(),
+            On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
+                transform.translation.x += drag.delta.x; // Make the square follow the mouse
+                transform.translation.y -= drag.delta.y;
+            }),
+            On::<Pointer<Click>>::send_event::<ui::InspectEvent>(),
+        );
+        commands.spawn(tile_bundle);
     }
 }
 
