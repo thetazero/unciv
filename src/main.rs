@@ -33,7 +33,7 @@ fn main() {
         ((
             handle_keyboard_input,
             ui::update_selection,
-            (ui::update_inspector, ui::update_resource_panel),
+            (ui::update_inspector, ui::update_empire_panel),
             tick::tick_world,
         ))
             .chain(),

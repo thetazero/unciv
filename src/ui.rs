@@ -7,6 +7,7 @@ use crate::tile;
 #[derive(Resource)]
 pub struct UiState {
     pub selected_tile: Option<Entity>,
+    pub selected_empire: Option<Entity>,
 }
 
 #[derive(Component)]
@@ -15,6 +16,7 @@ pub struct ResourceUi;
 pub fn init(mut commands: Commands) {
     commands.insert_resource(UiState {
         selected_tile: None,
+        selected_empire: None,
     });
 
     commands
@@ -109,9 +111,17 @@ pub fn init_inspector(mut commands: Commands) {
         });
 }
 
-pub fn update_selection(mut ev_inspect: EventReader<InspectEvent>, mut ui_state: ResMut<UiState>) {
+pub fn update_selection(
+    mut ev_inspect: EventReader<InspectEvent>,
+    mut ui_state: ResMut<UiState>,
+    tile_query: Query<(Entity, &tile::Tile)>,
+) {
     for ev in ev_inspect.read() {
         ui_state.selected_tile = Some(ev.0);
+        let (_, tile) = tile_query.get(ev.0).unwrap();
+        if let Some(owner) = tile.owner {
+            ui_state.selected_empire = Some(owner);
+        }
     }
 }
 
@@ -146,31 +156,25 @@ pub fn update_inspector(
     }
 }
 
-pub fn update_resource_panel(
+pub fn update_empire_panel(
     ui_state: ResMut<UiState>,
     mut resources_inspector_query: Query<&mut Text, With<ResourceUi>>,
-    tile_query: Query<(Entity, &tile::Tile)>,
     empire_query: Query<(Entity, &empire::Empire)>,
 ) {
-    match ui_state.selected_tile {
+    match ui_state.selected_empire {
         Some(entity) => {
-            let (_, tile) = tile_query.get(entity).unwrap();
+            let (_, empire) = empire_query.get(entity).unwrap();
 
             for mut text in resources_inspector_query.iter_mut() {
-                if let Some(empire) = tile.owner {
-                    let (_, empire) = empire_query.get(empire).unwrap();
-                    text.sections[0].value = format!(
-                        "Wood: {}\nStone: {}\nEmpire: {}",
-                        empire.inventory.wood, empire.inventory.stone, empire.id
-                    );
-                } else {
-                    text.sections[0].value = "Wood: 0\nStone: 0\nUnowned".to_string();
-                }
+                text.sections[0].value = format!(
+                    "Wood: {}\nStone: {}\nEmpire: {}",
+                    empire.inventory.wood, empire.inventory.stone, empire.id
+                );
             }
         }
         None => {
             for mut text in resources_inspector_query.iter_mut() {
-                text.sections[0].value = "Wood: 0\nStone: 0\nUnowned".to_string();
+                text.sections[0].value = "No empire selected".to_string();
             }
         }
     }
