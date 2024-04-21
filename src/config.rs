@@ -1,15 +1,39 @@
 use bevy::input::keyboard::KeyCode;
+use bevy::math::Vec3;
+
+pub struct KeyBinds {
+    pub quit: KeyCode,
+    pub zoom_in: KeyCode,
+    pub zoom_out: KeyCode,
+}
+
+pub struct CameraConfig {
+    pub pan_speed: f32,
+    pub zoom_speed: f32,
+    pub max_zoom: Vec3,
+    pub min_zoom: Vec3,
+}
+
 pub struct Config {
-    pub camera_speed: f32,
-    pub quit_key: KeyCode,
+    pub camera: CameraConfig,
     pub world_size: (i32, i32),
+    pub keys: KeyBinds,
 }
 
 pub const fn default_config() -> Config {
     Config {
-        camera_speed: 200.,
-        quit_key: KeyCode::CapsLock,
+        camera: CameraConfig {
+            pan_speed: 200.0,
+            zoom_speed: 1.0,
+            max_zoom: Vec3::new(2.0, 2.0, 2.0),
+            min_zoom: Vec3::new(0.5, 0.5, 0.5),
+        },
         world_size: (30, 30),
+        keys: KeyBinds {
+            quit: KeyCode::CapsLock,
+            zoom_in: KeyCode::Equal,
+            zoom_out: KeyCode::Minus,
+        },
     }
 }
 
