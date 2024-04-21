@@ -1,6 +1,6 @@
-use bevy::prelude::*;
-use crate::tile::Tile;
 use crate::colors::bright_hue;
+use crate::tile::Tile;
+use bevy::prelude::*;
 
 use core::iter::zip;
 use rand::seq::IteratorRandom;
@@ -19,12 +19,12 @@ pub struct Inventory {
 
 pub fn spawn(
     mut commands: Commands,
-    query: Query<(Entity, &Tile)>,
+    mut query: Query<(Entity, &mut Tile)>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     const NUMBER_OF_EMPIRES: i64 = 10;
 
-    let mut empire_data = vec![];
+    let mut empire_list = vec![];
 
     for i in 0..NUMBER_OF_EMPIRES {
         let color = materials.add(bright_hue(i as f32 / NUMBER_OF_EMPIRES as f32));
@@ -39,16 +39,18 @@ pub fn spawn(
             ))
             .id();
 
-        empire_data.push((empire, color));
+        empire_list.push((empire, color));
     }
 
     let mut rng = rand::thread_rng();
     let spawn_tiles = query
-        .iter()
+        .iter_mut()
         .choose_multiple(&mut rng, NUMBER_OF_EMPIRES as usize);
 
-    for ((entity, _tile), (empire, color)) in zip(spawn_tiles, empire_data) {
+    for ((entity, mut tile), (empire, color)) in zip(spawn_tiles, empire_list) {
         commands.entity(empire).push_children(&[entity]);
         commands.entity(entity).insert(color.clone());
+
+        tile.owner = Some(empire);
     }
 }

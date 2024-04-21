@@ -44,6 +44,7 @@ pub struct Tile {
     pub y: i32,
     pub kind: TileType,
     pub neighbors: Vec<Entity>,
+    pub owner: Option<Entity>,
 }
 
 #[derive(Resource)]
@@ -91,6 +92,7 @@ fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<Tile> {
                 y,
                 kind: kind.clone(),
                 neighbors: vec![],
+                owner: None,
             });
         }
     }

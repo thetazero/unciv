@@ -1,6 +1,9 @@
+use std::string;
+
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
+use crate::empire;
 use crate::tile;
 
 #[derive(Component)]
@@ -32,7 +35,7 @@ pub fn init(mut commands: Commands) {
                     parent.spawn((
                         ResourceUi,
                         TextBundle::from_section(
-                            "Text Example\nlol",
+                            "Idk",
                             TextStyle {
                                 font_size: 20.0,
                                 ..default()
@@ -50,6 +53,9 @@ pub fn init(mut commands: Commands) {
 
 #[derive(Component)]
 pub struct InspectorTitle;
+
+#[derive(Component)]
+pub struct EmpireName;
 
 pub fn init_inspector(mut commands: Commands) {
     commands
@@ -80,7 +86,7 @@ pub fn init_inspector(mut commands: Commands) {
                     parent.spawn((
                         InspectorTitle,
                         TextBundle::from_section(
-                            "Text Example\nlol",
+                            "Inspector Title",
                             TextStyle {
                                 font_size: 20.0,
                                 ..default()
@@ -107,17 +113,28 @@ pub fn update(
 }
 
 pub fn update_inspector(
-    mut query: Query<&mut Text, With<InspectorTitle>>,
+    mut inspector_query: Query<&mut Text, With<InspectorTitle>>,
     tile_query: Query<(Entity, &tile::Tile)>,
     mut ev_inspect: EventReader<InspectEvent>,
+    mut empires: Query<(Entity, &empire::Empire)>,
 ) {
     for ev in ev_inspect.read() {
-        for mut text in query.iter_mut() {
+        let entity = ev.0;
+        let (_, tile) = tile_query.get(entity).unwrap();
+
+        for mut text in inspector_query.iter_mut() {
             // Update the text
-            let entity = ev.0;
-            let (_, tile) = tile_query.get(entity).unwrap();
-            text.sections[0].value = format!("Tile: ({}, {})", tile.x, tile.y);
+            let mut string_to_display = format!("Tile: ({}, {})", tile.x, tile.y);
+
             println!("Inspecting tile ({}, {})", tile.x, tile.y);
+            if let Some(empire) = tile.owner {
+                let (_, empire) = empires.get(empire).unwrap();
+                string_to_display.push_str(&format!("\nEmpire: {}", empire.id));
+            } else {
+                string_to_display.push_str("\nUnowned");
+            }
+
+            text.sections[0].value = string_to_display;
         }
     }
 }
