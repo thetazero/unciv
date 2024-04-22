@@ -48,6 +48,8 @@ pub struct TileResources {
     pub square: Handle<Mesh>,
 }
 
+const TILE_SIZE: f32 = 50.;
+
 pub fn create_tile_resources(
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -58,7 +60,7 @@ pub fn create_tile_resources(
     let mountain = materials.add(Color::hsl(0.3, 0.1, 0.3));
     let water = materials.add(Color::hsl(200.0, 0.3, 0.5));
 
-    let square: Handle<Mesh> = meshes.add(Rectangle::new(50.0, 50.0));
+    let square: Handle<Mesh> = meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE));
 
     TileResources {
         forest,
@@ -70,6 +72,11 @@ pub fn create_tile_resources(
     }
 }
 
+#[derive(Resource)]
+pub struct WorldState {
+    pub tiles: HashMap<(i32, i32), Entity>,
+}
+
 fn distribute(i: i32, count: i32, extent: f32) -> f32 {
     -extent / 2. + i as f32 / (count - 1) as f32 * extent
 }
@@ -77,6 +84,10 @@ fn distribute(i: i32, count: i32, extent: f32) -> f32 {
 const X_EXTENT: f32 = 1800.;
 
 pub fn spawn(mut commands: Commands, tile_resources: Res<TileResources>) {
+    let mut world_state = WorldState {
+        tiles: HashMap::new(),
+    };
+
     let (x_count, y_count) = CONFIG.world_size;
 
     let tile_data = world_gen::spawn_tile_data(x_count, y_count);
@@ -101,16 +112,14 @@ pub fn spawn(mut commands: Commands, tile_resources: Res<TileResources>) {
             }),
             On::<Pointer<Click>>::send_event::<ui::InspectEvent>(),
         );
-        commands.spawn(tile_bundle);
+        let tile_entity = commands.spawn(tile_bundle);
+        world_state.tiles.insert((tile.x, tile.y), tile_entity.id());
     }
+
+    commands.insert_resource(world_state);
 }
 
-pub fn link(mut query: Query<(Entity, &mut Tile)>) {
-    let mut tile_ids: HashMap<(i32, i32), Entity> = HashMap::new();
-    for (entity, tile) in query.iter_mut() {
-        tile_ids.insert((tile.x, tile.y), entity);
-    }
-
+pub fn link(mut query: Query<(Entity, &mut Tile)>, world_state: Res<WorldState>) {
     for (_, mut tile) in query.iter_mut() {
         let neighbors = [
             (tile.x - 1, tile.y),
@@ -120,7 +129,7 @@ pub fn link(mut query: Query<(Entity, &mut Tile)>) {
         ];
 
         for (x, y) in neighbors.iter() {
-            if let Some(neighbor) = tile_ids.get(&(*x, *y)) {
+            if let Some(neighbor) = world_state.tiles.get(&(*x, *y)) {
                 tile.neighbors.push(*neighbor);
             }
         }
