@@ -1,16 +1,6 @@
-use bevy::{
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-};
-use bevy_mod_picking::prelude::*;
+use bevy::prelude::*;
 
 use crate::colors::dark_hue;
-use crate::config::CONFIG;
-use crate::ui;
-
-use std::collections::HashMap;
-
-use crate::world_gen;
 
 #[derive(Clone, Copy)]
 pub enum TileKind {
@@ -20,7 +10,7 @@ pub enum TileKind {
     Water,
 }
 
-fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<ColorMaterial> {
+pub fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<ColorMaterial> {
     match kind {
         TileKind::Forest => tile_resources.forest.clone(),
         TileKind::Mountain => tile_resources.mountain.clone(),
@@ -34,7 +24,6 @@ pub struct Tile {
     pub x: i32,
     pub y: i32,
     pub kind: TileKind,
-    pub neighbors: Vec<Entity>,
     pub owner: Option<Entity>,
 }
 
@@ -48,7 +37,7 @@ pub struct TileResources {
     pub square: Handle<Mesh>,
 }
 
-const TILE_SIZE: f32 = 50.;
+pub const TILE_SIZE: f32 = 50.;
 
 pub fn create_tile_resources(
     mut materials: ResMut<Assets<ColorMaterial>>,
@@ -69,69 +58,5 @@ pub fn create_tile_resources(
         mountain,
         empire_red,
         square,
-    }
-}
-
-#[derive(Resource)]
-pub struct WorldState {
-    pub tiles: HashMap<(i32, i32), Entity>,
-}
-
-fn distribute(i: i32, count: i32, extent: f32) -> f32 {
-    -extent / 2. + i as f32 / (count - 1) as f32 * extent
-}
-
-const X_EXTENT: f32 = 1800.;
-
-pub fn spawn(mut commands: Commands, tile_resources: Res<TileResources>) {
-    let mut world_state = WorldState {
-        tiles: HashMap::new(),
-    };
-
-    let (x_count, y_count) = CONFIG.world_size;
-
-    let tile_data = world_gen::spawn_tile_data(x_count, y_count);
-
-    for tile in tile_data.iter() {
-        let tile_bundle = (
-            tile.clone(),
-            MaterialMesh2dBundle {
-                mesh: Mesh2dHandle(tile_resources.square.clone()),
-                material: tile_material(&tile.kind, &tile_resources),
-                transform: Transform::from_xyz(
-                    distribute(tile.x, x_count, X_EXTENT),
-                    distribute(tile.y, x_count, X_EXTENT),
-                    0.0,
-                ),
-                ..default()
-            },
-            PickableBundle::default(),
-            On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
-                transform.translation.x += drag.delta.x; // Make the square follow the mouse
-                transform.translation.y -= drag.delta.y;
-            }),
-            On::<Pointer<Click>>::send_event::<ui::InspectEvent>(),
-        );
-        let tile_entity = commands.spawn(tile_bundle);
-        world_state.tiles.insert((tile.x, tile.y), tile_entity.id());
-    }
-
-    commands.insert_resource(world_state);
-}
-
-pub fn link(mut query: Query<(Entity, &mut Tile)>, world_state: Res<WorldState>) {
-    for (_, mut tile) in query.iter_mut() {
-        let neighbors = [
-            (tile.x - 1, tile.y),
-            (tile.x + 1, tile.y),
-            (tile.x, tile.y - 1),
-            (tile.x, tile.y + 1),
-        ];
-
-        for (x, y) in neighbors.iter() {
-            if let Some(neighbor) = world_state.tiles.get(&(*x, *y)) {
-                tile.neighbors.push(*neighbor);
-            }
-        }
     }
 }

@@ -22,9 +22,8 @@ fn main() {
         Startup,
         (
             (setup, add_resources, tick::init_tick),
-            tile::spawn,
-            tile::link,
-            (empire::spawn, ui::init, ui::init_inspector),
+            world_gen::spawn,
+            (world_gen::spawn_empires, ui::init, ui::init_inspector),
         )
             .chain(),
     )
@@ -112,7 +111,9 @@ fn handle_keyboard_input(
 
     for mut transform in camera.iter_mut() {
         transform.scale *= 1. + delta_scale * time.delta_seconds();
-        transform.scale = transform.scale.clamp(CONFIG.camera.min_zoom, CONFIG.camera.max_zoom);
+        transform.scale = transform
+            .scale
+            .clamp(CONFIG.camera.min_zoom, CONFIG.camera.max_zoom);
 
         let scale_magnitude = transform.scale.length();
 
@@ -139,8 +140,7 @@ mod test {
             Update,
             (
                 crate::add_resources,
-                crate::tile::spawn,
-                crate::empire::spawn,
+                crate::world_gen::spawn,
             )
                 .chain(),
         );

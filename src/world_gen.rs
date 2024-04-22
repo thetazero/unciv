@@ -1,6 +1,13 @@
-use crate::tile;
-
+use bevy::prelude::*;
+use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
+use bevy_mod_picking::prelude::*;
+use core::iter::zip;
 use noise::{NoiseFn, Simplex};
+use rand::seq::IteratorRandom;
+use std::collections::HashMap;
+
+use crate::config::CONFIG;
+use crate::{colors, empire, tile, ui};
 
 fn compute_tile_kind(height: f64, biome: f64) -> tile::TileKind {
     if height < -0.1 {
@@ -37,10 +44,89 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
                 x,
                 y,
                 kind: kind.clone(),
-                neighbors: vec![],
                 owner: None,
             });
         }
     }
     tiles
+}
+
+#[derive(Resource)]
+pub struct WorldState {
+    pub tiles: HashMap<(i32, i32), Entity>,
+}
+
+pub fn spawn(mut commands: Commands, tile_resources: Res<tile::TileResources>) {
+    let mut world_state = WorldState {
+        tiles: HashMap::new(),
+    };
+
+    let (x_count, y_count) = CONFIG.world_size;
+
+    let tile_data = spawn_tile_data(x_count, y_count);
+
+    for tile in tile_data.iter() {
+        let tile_bundle = (
+            tile.clone(),
+            MaterialMesh2dBundle {
+                mesh: Mesh2dHandle(tile_resources.square.clone()),
+                material: tile::tile_material(&tile.kind, &tile_resources),
+                transform: Transform::from_xyz(
+                    tile.x as f32 * (tile::TILE_SIZE + 1.),
+                    tile.y as f32 * (tile::TILE_SIZE + 1.),
+                    0.0,
+                ),
+                ..default()
+            },
+            PickableBundle::default(),
+            On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
+                transform.translation.x += drag.delta.x; // Make the square follow the mouse
+                transform.translation.y -= drag.delta.y;
+            }),
+            On::<Pointer<Click>>::send_event::<ui::InspectEvent>(),
+        );
+        let tile_entity = commands.spawn(tile_bundle);
+        world_state.tiles.insert((tile.x, tile.y), tile_entity.id());
+    }
+
+    commands.insert_resource(world_state);
+}
+
+pub fn spawn_empires(
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut tile::Tile)>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    const NUMBER_OF_EMPIRES: i64 = 10;
+
+    let mut empire_list = vec![];
+
+    for i in 0..NUMBER_OF_EMPIRES {
+        let color = materials.add(colors::bright_hue(i as f32 / NUMBER_OF_EMPIRES as f32));
+        let empire = commands
+            .spawn((
+                empire::Empire {
+                    id: i as i32,
+                    color: color.clone(),
+                    inventory: empire::Inventory { wood: 0, stone: 0 },
+                },
+                TransformBundle::default(),
+                InheritedVisibility::default(),
+            ))
+            .id();
+
+        empire_list.push((empire, color));
+    }
+
+    let mut rng = rand::thread_rng();
+    let spawn_tiles = query
+        .iter_mut()
+        .choose_multiple(&mut rng, NUMBER_OF_EMPIRES as usize);
+
+    for ((entity, mut tile), (empire, color)) in zip(spawn_tiles, empire_list) {
+        commands.entity(empire).push_children(&[entity]);
+        commands.entity(entity).insert(color.clone());
+
+        tile.owner = Some(empire);
+    }
 }
