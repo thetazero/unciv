@@ -80,7 +80,6 @@ pub struct WorldState {
 pub fn spawn(
     mut commands: Commands,
     tile_resources: Res<tile::TileResources>,
-    mut tile_query: Query<(Entity, &mut tile::Tile)>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let mut world_state = WorldState {
@@ -98,15 +97,17 @@ pub fn spawn(
 
     for i in 0..NUMBER_OF_EMPIRES {
         let color = materials.add(colors::bright_hue(i as f32 / NUMBER_OF_EMPIRES as f32));
-        let empire_entity = commands.spawn((
-            empire::Empire {
-                id: i as i32,
-                color: color.clone(),
-                inventory: empire::Inventory { wood: 0, stone: 0 },
-            },
-            TransformBundle::default(),
-            InheritedVisibility::default(),
-        )).id();
+        let empire_entity = commands
+            .spawn((
+                empire::Empire {
+                    id: i as i32,
+                    color: color.clone(),
+                    inventory: empire::Inventory { wood: 0, stone: 0 },
+                },
+                TransformBundle::default(),
+                InheritedVisibility::default(),
+            ))
+            .id();
 
         world_state.empires.insert(i, empire_entity);
 
