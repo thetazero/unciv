@@ -1,4 +1,8 @@
+use std::collections::HashMap;
+
 use bevy::prelude::*;
+
+use crate::resource;
 
 #[derive(Component)]
 pub struct Empire {
@@ -9,6 +13,5 @@ pub struct Empire {
 
 #[derive(Component)]
 pub struct Inventory {
-    pub wood: i32,
-    pub stone: i32,
+    pub inv: HashMap<resource::Resource, i32>,
 }

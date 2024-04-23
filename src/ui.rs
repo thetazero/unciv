@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::{empire, tile, world_gen};
+use crate::{empire, resource, tile, world_gen};
 
 #[derive(Resource)]
 pub struct UiState {
@@ -162,16 +162,18 @@ pub fn update_inspector(
 pub fn update_empire_panel(
     ui_state: ResMut<UiState>,
     mut resources_inspector_query: Query<&mut Text, With<ResourceUi>>,
-    empire_query: Query<(Entity, &empire::Empire)>,
+    empire_query: Query<&empire::Empire>,
 ) {
     match ui_state.selected_empire {
         Some(entity) => {
-            let (_, empire) = empire_query.get(entity).unwrap();
+            let empire = empire_query.get(entity).unwrap();
 
             for mut text in resources_inspector_query.iter_mut() {
                 text.sections[0].value = format!(
                     "Wood: {}\nStone: {}\nEmpire: {}",
-                    empire.inventory.wood, empire.inventory.stone, empire.id
+                    empire.inventory.inv.get(&resource::Resource::Wood).unwrap_or(&0),
+                    empire.inventory.inv.get(&resource::Resource::Stone).unwrap_or(&0),
+                    empire.id
                 );
             }
         }

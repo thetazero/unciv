@@ -103,7 +103,9 @@ pub fn spawn(
                 empire::Empire {
                     id: i as i32,
                     color: color.clone(),
-                    inventory: empire::Inventory { wood: 0, stone: 0 },
+                    inventory: empire::Inventory {
+                        inv: HashMap::new(),
+                    },
                 },
                 TransformBundle::default(),
                 InheritedVisibility::default(),

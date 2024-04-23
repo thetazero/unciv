@@ -10,6 +10,8 @@ mod tile;
 mod ui;
 mod utils;
 mod world_gen;
+mod building;
+mod resource;
 
 use crate::config::CONFIG;
 
