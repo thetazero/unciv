@@ -8,6 +8,7 @@ mod tick;
 mod tile;
 mod ui;
 mod world_gen;
+mod utils;
 
 use crate::config::CONFIG;
 
@@ -23,7 +24,7 @@ fn main() {
         (
             (setup, add_resources, tick::init_tick),
             world_gen::spawn,
-            (world_gen::spawn_empires, ui::init, ui::init_inspector),
+            (ui::init, ui::init_inspector),
         )
             .chain(),
     )

@@ -1,8 +1,10 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+};
 
 use crate::colors::dark_hue;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum TileKind {
     Forest,
     Desert,
@@ -24,7 +26,7 @@ pub struct Tile {
     pub x: i32,
     pub y: i32,
     pub kind: TileKind,
-    pub owner: Option<Entity>,
+    pub owner: Option<i32>,
 }
 
 #[derive(Resource)]
@@ -58,5 +60,12 @@ pub fn create_tile_resources(
         mountain,
         empire_red,
         square,
+    }
+}
+
+fn is_spawnable(kind: &TileKind) -> bool {
+    match kind {
+        TileKind::Forest | TileKind::Mountain => true,
+        _ => false,
     }
 }

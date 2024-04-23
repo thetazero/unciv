@@ -51,26 +51,79 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
     tiles
 }
 
+fn add_empire_data(tile_data: &mut Vec<tile::Tile>, number_of_empires: i32) {
+    let mut spawned_empires = 0;
+    let mut rng = rand::thread_rng();
+
+    let mut max_attempts = 1000;
+    while spawned_empires < number_of_empires && max_attempts > 0 {
+        let chosen_tile = tile_data.iter_mut().choose(&mut rng).unwrap();
+
+        if chosen_tile.kind == tile::TileKind::Forest {
+            chosen_tile.owner = Some(spawned_empires);
+            spawned_empires += 1;
+        }
+
+        max_attempts -= 1;
+    }
+    if max_attempts == 0 {
+        panic!("Could not place all empires");
+    }
+}
+
 #[derive(Resource)]
 pub struct WorldState {
     pub tiles: HashMap<(i32, i32), Entity>,
+    pub empires: HashMap<i32, Entity>,
 }
 
-pub fn spawn(mut commands: Commands, tile_resources: Res<tile::TileResources>) {
+pub fn spawn(
+    mut commands: Commands,
+    tile_resources: Res<tile::TileResources>,
+    mut tile_query: Query<(Entity, &mut tile::Tile)>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
     let mut world_state = WorldState {
         tiles: HashMap::new(),
+        empires: HashMap::new(),
     };
+    const NUMBER_OF_EMPIRES: i32 = 10;
 
     let (x_count, y_count) = CONFIG.world_size;
 
-    let tile_data = spawn_tile_data(x_count, y_count);
+    let mut tile_data = spawn_tile_data(x_count, y_count);
+    add_empire_data(&mut tile_data, NUMBER_OF_EMPIRES);
+
+    let mut color_list = vec![];
+
+    for i in 0..NUMBER_OF_EMPIRES {
+        let color = materials.add(colors::bright_hue(i as f32 / NUMBER_OF_EMPIRES as f32));
+        let empire_entity = commands.spawn((
+            empire::Empire {
+                id: i as i32,
+                color: color.clone(),
+                inventory: empire::Inventory { wood: 0, stone: 0 },
+            },
+            TransformBundle::default(),
+            InheritedVisibility::default(),
+        )).id();
+
+        world_state.empires.insert(i, empire_entity);
+
+        color_list.push(color);
+    }
 
     for tile in tile_data.iter() {
+        let material = match tile.owner {
+            Some(empire_id) => color_list.get(empire_id as usize).unwrap().clone(),
+            None => tile::tile_material(&tile.kind, &tile_resources),
+        };
+
         let tile_bundle = (
             tile.clone(),
             MaterialMesh2dBundle {
                 mesh: Mesh2dHandle(tile_resources.square.clone()),
-                material: tile::tile_material(&tile.kind, &tile_resources),
+                material,
                 transform: Transform::from_xyz(
                     tile.x as f32 * (tile::TILE_SIZE + 1.),
                     tile.y as f32 * (tile::TILE_SIZE + 1.),
@@ -90,43 +143,4 @@ pub fn spawn(mut commands: Commands, tile_resources: Res<tile::TileResources>) {
     }
 
     commands.insert_resource(world_state);
-}
-
-pub fn spawn_empires(
-    mut commands: Commands,
-    mut query: Query<(Entity, &mut tile::Tile)>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-    const NUMBER_OF_EMPIRES: i64 = 10;
-
-    let mut empire_list = vec![];
-
-    for i in 0..NUMBER_OF_EMPIRES {
-        let color = materials.add(colors::bright_hue(i as f32 / NUMBER_OF_EMPIRES as f32));
-        let empire = commands
-            .spawn((
-                empire::Empire {
-                    id: i as i32,
-                    color: color.clone(),
-                    inventory: empire::Inventory { wood: 0, stone: 0 },
-                },
-                TransformBundle::default(),
-                InheritedVisibility::default(),
-            ))
-            .id();
-
-        empire_list.push((empire, color));
-    }
-
-    let mut rng = rand::thread_rng();
-    let spawn_tiles = query
-        .iter_mut()
-        .choose_multiple(&mut rng, NUMBER_OF_EMPIRES as usize);
-
-    for ((entity, mut tile), (empire, color)) in zip(spawn_tiles, empire_list) {
-        commands.entity(empire).push_children(&[entity]);
-        commands.entity(entity).insert(color.clone());
-
-        tile.owner = Some(empire);
-    }
 }

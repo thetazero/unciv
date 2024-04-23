@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::empire;
-use crate::tile;
+use crate::{empire, tile, world_gen};
 
 #[derive(Resource)]
 pub struct UiState {
@@ -115,12 +114,15 @@ pub fn update_selection(
     mut ev_inspect: EventReader<InspectEvent>,
     mut ui_state: ResMut<UiState>,
     tile_query: Query<(Entity, &tile::Tile)>,
+    empire_query: Query<(Entity, &empire::Empire)>,
+    world_state: Res<world_gen::WorldState>,
 ) {
     for ev in ev_inspect.read() {
         ui_state.selected_tile = Some(ev.0);
         let (_, tile) = tile_query.get(ev.0).unwrap();
         if let Some(owner) = tile.owner {
-            ui_state.selected_empire = Some(owner);
+            let empire_entity = world_state.empires.get(&owner).unwrap();
+            ui_state.selected_empire = Some(*empire_entity);
         }
     }
 }
@@ -130,6 +132,7 @@ pub fn update_inspector(
     mut inspector_query: Query<&mut Text, With<InspectorTitle>>,
     tile_query: Query<(Entity, &tile::Tile)>,
     empire_query: Query<(Entity, &empire::Empire)>,
+    world_state: Res<world_gen::WorldState>,
 ) {
     match ui_state.selected_tile {
         Some(entity) => {
@@ -138,8 +141,9 @@ pub fn update_inspector(
             for mut text in inspector_query.iter_mut() {
                 let mut string_to_display = format!("Tile: ({}, {})", tile.x, tile.y);
 
-                if let Some(empire) = tile.owner {
-                    let (_, empire) = empire_query.get(empire).unwrap();
+                if let Some(empire_id) = tile.owner {
+                    let empire_entity = world_state.empires.get(&empire_id).unwrap();
+                    let (_, empire) = empire_query.get(*empire_entity).unwrap();
                     string_to_display.push_str(&format!("\nEmpire: {}", empire.id));
                 } else {
                     string_to_display.push_str("\nUnowned");

@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
 
-use crate::{empire, tile};
+use crate::{empire, tile, world_gen};
 
 #[derive(Resource)]
 pub struct TickState {
@@ -21,6 +21,7 @@ pub fn tick_world(
     mut empire_query: Query<(Entity, &mut empire::Empire)>,
     time: ResMut<Time>,
     mut tick_state: ResMut<TickState>,
+    world_state: ResMut<world_gen::WorldState>,
 ) {
     tick_state.stop_watch.tick(time.delta());
 
@@ -32,7 +33,9 @@ pub fn tick_world(
 
     for (_entity, tile) in tile_query.iter_mut() {
         if let Some(owner) = tile.owner {
-            let (_, mut empire) = empire_query.get_mut(owner).unwrap();
+            let owner_entity = world_state.empires.get(&owner).unwrap();
+            let (_, mut empire) = empire_query.get_mut(owner_entity.clone()).unwrap();
+
             match tile.kind {
                 tile::TileKind::Forest => empire.inventory.wood += 1,
                 tile::TileKind::Mountain => empire.inventory.stone += 1,
