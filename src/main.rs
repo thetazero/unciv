@@ -1,3 +1,4 @@
+use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
@@ -7,8 +8,8 @@ mod empire;
 mod tick;
 mod tile;
 mod ui;
-mod world_gen;
 mod utils;
+mod world_gen;
 
 use crate::config::CONFIG;
 
@@ -17,11 +18,16 @@ fn main() {
 
     app.add_plugins(DefaultPlugins.set(low_latency_window_plugin()))
         .add_plugins(DefaultPickingPlugins)
+        .add_plugins(FrameTimeDiagnosticsPlugin::default())
         .insert_resource(DebugPickingMode::Normal);
+
+    // app.add_systems(Startup, ui::setup_fps_counter);
+    // app.add_systems(Update, (ui::fps_text_update_system, ui::fps_counter_showhide));
 
     app.add_systems(
         Startup,
         (
+            ui::setup_fps_counter,
             (setup, add_resources, tick::init_tick),
             world_gen::spawn,
             (ui::init, ui::init_inspector),
@@ -34,6 +40,7 @@ fn main() {
             handle_keyboard_input,
             ui::update_selection,
             (ui::update_inspector, ui::update_empire_panel),
+            (ui::fps_text_update_system, ui::fps_counter_showhide),
             tick::tick_world,
         ))
             .chain(),
@@ -139,11 +146,7 @@ mod test {
 
         app.add_systems(
             Update,
-            (
-                crate::add_resources,
-                crate::world_gen::spawn,
-            )
-                .chain(),
+            (crate::add_resources, crate::world_gen::spawn).chain(),
         );
 
         app.update();
