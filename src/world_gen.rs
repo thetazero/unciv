@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use bevy_mod_picking::prelude::*;
-use core::iter::zip;
 use noise::{NoiseFn, Simplex};
 use rand::seq::IteratorRandom;
 use std::collections::HashMap;
@@ -18,8 +17,10 @@ fn compute_tile_kind(height: f64, biome: f64) -> tile::TileKind {
         } else {
             return tile::TileKind::Forest;
         }
-    } else {
+    } else if height < 0.7 {
         return tile::TileKind::Mountain;
+    } else {
+        return tile::TileKind::SnowyMountain;
     }
 }
 
@@ -36,8 +37,8 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
             let x_float = x as f64;
             let y_float = y as f64;
 
-            let height = scaled_simplex_2d(simplex_2d, x_float, y_float, 0.15);
-            let biome = scaled_simplex_2d(simplex_2d, x_float, y_float, 0.03);
+            let height = scaled_simplex_2d(simplex_2d, x_float, y_float, 0.05);
+            let biome = scaled_simplex_2d(simplex_2d, x_float, y_float, 0.02);
 
             let kind: tile::TileKind = compute_tile_kind(height, biome);
             tiles.push(tile::Tile {
@@ -59,7 +60,7 @@ fn add_empire_data(tile_data: &mut Vec<tile::Tile>, number_of_empires: i32) {
     while spawned_empires < number_of_empires && max_attempts > 0 {
         let chosen_tile = tile_data.iter_mut().choose(&mut rng).unwrap();
 
-        if chosen_tile.kind == tile::TileKind::Forest {
+        if tile::is_spawnable(&chosen_tile.kind) && chosen_tile.owner.is_none() {
             chosen_tile.owner = Some(spawned_empires);
             spawned_empires += 1;
         }

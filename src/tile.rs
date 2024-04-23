@@ -1,23 +1,23 @@
-use bevy::{
-    prelude::*,
-};
+use bevy::prelude::*;
 
 use crate::colors::dark_hue;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum TileKind {
-    Forest,
     Desert,
+    Forest,
     Mountain,
+    SnowyMountain,
     Water,
 }
 
 pub fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<ColorMaterial> {
     match kind {
-        TileKind::Forest => tile_resources.forest.clone(),
-        TileKind::Mountain => tile_resources.mountain.clone(),
-        TileKind::Water => tile_resources.water.clone(),
-        TileKind::Desert => tile_resources.desert.clone(),
+        TileKind::Desert => tile_resources.materials.desert.clone(),
+        TileKind::Forest => tile_resources.materials.forest.clone(),
+        TileKind::Mountain => tile_resources.materials.mountain.clone(),
+        TileKind::SnowyMountain => tile_resources.materials.snowy_mountain.clone(),
+        TileKind::Water => tile_resources.materials.water.clone(),
     }
 }
 
@@ -29,12 +29,17 @@ pub struct Tile {
     pub owner: Option<i32>,
 }
 
+struct TileMaterials {
+    pub desert: Handle<ColorMaterial>,
+    pub forest: Handle<ColorMaterial>,
+    pub mountain: Handle<ColorMaterial>,
+    pub snowy_mountain: Handle<ColorMaterial>,
+    pub water: Handle<ColorMaterial>,
+}
+
 #[derive(Resource)]
 pub struct TileResources {
-    pub forest: Handle<ColorMaterial>,
-    pub desert: Handle<ColorMaterial>,
-    pub water: Handle<ColorMaterial>,
-    pub mountain: Handle<ColorMaterial>,
+    materials: TileMaterials,
     pub empire_red: Handle<ColorMaterial>,
     pub square: Handle<Mesh>,
 }
@@ -46,24 +51,28 @@ pub fn create_tile_resources(
     mut meshes: ResMut<Assets<Mesh>>,
 ) -> TileResources {
     let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
-    let forest: Handle<ColorMaterial> = materials.add(dark_hue(0.4));
     let desert = materials.add(Color::hsl(47., 0.29, 0.49));
+    let forest: Handle<ColorMaterial> = materials.add(dark_hue(0.4));
     let mountain = materials.add(Color::hsl(0.3, 0.1, 0.3));
+    let snowy_mountain = materials.add(Color::hsl(0.3, 0.05, 0.8));
     let water = materials.add(Color::hsl(200.0, 0.3, 0.5));
 
     let square: Handle<Mesh> = meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE));
 
     TileResources {
-        forest,
-        desert,
-        water,
-        mountain,
+        materials: TileMaterials {
+            desert,
+            forest,
+            mountain,
+            snowy_mountain,
+            water,
+        },
         empire_red,
         square,
     }
 }
 
-fn is_spawnable(kind: &TileKind) -> bool {
+pub fn is_spawnable(kind: &TileKind) -> bool {
     match kind {
         TileKind::Forest | TileKind::Mountain => true,
         _ => false,

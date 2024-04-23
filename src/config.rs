@@ -24,11 +24,11 @@ pub const fn default_config() -> Config {
     Config {
         camera: CameraConfig {
             pan_speed: 200.0,
-            zoom_speed: 1.0,
-            max_zoom: Vec3::new(2.0, 2.0, 2.0),
-            min_zoom: Vec3::new(0.5, 0.5, 0.5),
+            zoom_speed: 1.4,
+            max_zoom: Vec3::new(5.0, 5.0, 5.0),
+            min_zoom: Vec3::new(0.4, 0.4, 0.4),
         },
-        world_size: (30, 30),
+        world_size: (100, 100),
         keys: KeyBinds {
             quit: KeyCode::CapsLock,
             zoom_in: KeyCode::Equal,

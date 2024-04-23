@@ -114,7 +114,6 @@ pub fn update_selection(
     mut ev_inspect: EventReader<InspectEvent>,
     mut ui_state: ResMut<UiState>,
     tile_query: Query<(Entity, &tile::Tile)>,
-    empire_query: Query<(Entity, &empire::Empire)>,
     world_state: Res<world_gen::WorldState>,
 ) {
     for ev in ev_inspect.read() {
