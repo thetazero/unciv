@@ -32,7 +32,7 @@ fn main() {
             ui::setup_fps_counter,
             (setup, add_resources, tick::init_tick),
             world_gen::spawn,
-            (ui::init, ui::init_inspector),
+            (ui::init, ui::init_tile_inspector),
         )
             .chain(),
     )
@@ -41,7 +41,7 @@ fn main() {
         ((
             handle_keyboard_input,
             ui::update_selection,
-            (ui::update_inspector, ui::update_empire_panel),
+            (ui::update_tile_inspector, ui::update_empire_panel),
             (ui::fps_text_update_system, ui::fps_counter_showhide),
             tick::tick_world,
         ))

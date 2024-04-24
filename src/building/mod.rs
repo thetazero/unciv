@@ -15,6 +15,6 @@ pub fn building_production(building: &Building) -> Vec<(resource::Resource, i32)
 
 pub fn building_name(building: &Building) -> String {
     match building {
-        Building::Capital(_) => capital::name(),
+        Building::Capital(cap) => capital::name(cap),
     }
 }

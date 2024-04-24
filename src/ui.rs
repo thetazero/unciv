@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::{empire, resource, tile, world_gen};
+use crate::{building, empire, resource, tile, world_gen};
 
 #[derive(Resource)]
 pub struct UiState {
@@ -60,12 +60,15 @@ pub fn init(mut commands: Commands) {
 }
 
 #[derive(Component)]
-pub struct InspectorTitle;
+pub struct TileInspectorTitle;
+
+#[derive(Component)]
+pub struct TileInspectorBuildingList;
 
 #[derive(Component)]
 pub struct EmpireName;
 
-pub fn init_inspector(mut commands: Commands) {
+pub fn init_tile_inspector(mut commands: Commands) {
     commands
         .spawn(NodeBundle {
             style: Style {
@@ -83,7 +86,7 @@ pub fn init_inspector(mut commands: Commands) {
             parent
                 .spawn(NodeBundle {
                     style: Style {
-                        width: Val::Percent(100.0),
+                        width: Val::Percent(50.0),
                         border: UiRect::all(Val::Px(2.)),
                         ..default()
                     },
@@ -92,9 +95,37 @@ pub fn init_inspector(mut commands: Commands) {
                 })
                 .with_children(|parent| {
                     parent.spawn((
-                        InspectorTitle,
+                        TileInspectorTitle,
                         TextBundle::from_section(
                             "Inspector Title",
+                            TextStyle {
+                                font_size: 20.0,
+                                ..default()
+                            },
+                        )
+                        .with_style(Style {
+                            margin: UiRect::all(Val::Px(5.)),
+                            ..default()
+                        }),
+                        Label,
+                    ));
+                });
+
+            parent
+                .spawn(NodeBundle {
+                    style: Style {
+                        width: Val::Percent(50.0),
+                        border: UiRect::all(Val::Px(2.)),
+                        ..default()
+                    },
+                    background_color: Color::rgb(0.08, 0.08, 0.08).into(),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    parent.spawn((
+                        TileInspectorBuildingList,
+                        TextBundle::from_section(
+                            "Building List",
                             TextStyle {
                                 font_size: 20.0,
                                 ..default()
@@ -131,9 +162,16 @@ fn tile_to_string(tile: &tile::Tile) -> String {
     format!("{}: ({}, {})", kind, tile.x, tile.y)
 }
 
-pub fn update_inspector(
+pub fn update_tile_inspector(
     ui_state: ResMut<UiState>,
-    mut inspector_query: Query<&mut Text, With<InspectorTitle>>,
+    mut tile_title_query: Query<
+        &mut Text,
+        (With<TileInspectorTitle>, Without<TileInspectorBuildingList>),
+    >,
+    mut building_list_query: Query<
+        &mut Text,
+        (With<TileInspectorBuildingList>, Without<TileInspectorTitle>),
+    >,
     tile_query: Query<(Entity, &tile::Tile)>,
     empire_query: Query<(Entity, &empire::Empire)>,
     world_state: Res<world_gen::WorldState>,
@@ -142,25 +180,40 @@ pub fn update_inspector(
         Some(entity) => {
             let (_, tile) = tile_query.get(entity).unwrap();
 
-            for mut text in inspector_query.iter_mut() {
-                let mut string_to_display = tile_to_string(tile);
+            let mut string_to_display = tile_to_string(tile);
 
-                if let Some(empire_id) = tile.owner {
-                    let empire_entity = world_state.empires.get(&empire_id).unwrap();
-                    let (_, empire) = empire_query.get(*empire_entity).unwrap();
-                    string_to_display.push_str(&format!("\nEmpire: {}", empire.id));
-                } else {
-                    string_to_display.push_str("\nUnowned");
-                }
-
-                text.sections[0].value = string_to_display;
+            if let Some(empire_id) = tile.owner {
+                let empire_entity = world_state.empires.get(&empire_id).unwrap();
+                let (_, empire) = empire_query.get(*empire_entity).unwrap();
+                string_to_display.push_str(&format!("\nEmpire: {}", empire.id));
+            } else {
+                string_to_display.push_str("\nUnowned");
             }
+
+            set_query_text(&mut tile_title_query, &string_to_display);
+
+            let building_list : Vec<String> = tile
+                .buildings
+                .iter()
+                .map(|building| building::building_name(building)).collect();;
+
+            let building_list = building_list.join("\t");
+
+            set_query_text(&mut building_list_query, &building_list);
         }
         None => {
-            for mut text in inspector_query.iter_mut() {
-                text.sections[0].value = "No tile selected".to_string();
-            }
+            set_query_text(&mut tile_title_query, "No tile selected");
+            set_query_text(&mut building_list_query, "");
         }
+    }
+}
+
+fn set_query_text<T: bevy::ecs::query::QueryFilter>(
+    query: &mut Query<&mut Text, T>,
+    new_text: &str,
+) {
+    for mut text in query.iter_mut() {
+        text.sections[0].value = new_text.to_string();
     }
 }
 
@@ -176,8 +229,16 @@ pub fn update_empire_panel(
             for mut text in resources_inspector_query.iter_mut() {
                 text.sections[0].value = format!(
                     "Wood: {}\nStone: {}\nEmpire: {}",
-                    empire.inventory.inv.get(&resource::Resource::Wood).unwrap_or(&0),
-                    empire.inventory.inv.get(&resource::Resource::Stone).unwrap_or(&0),
+                    empire
+                        .inventory
+                        .inv
+                        .get(&resource::Resource::Wood)
+                        .unwrap_or(&0),
+                    empire
+                        .inventory
+                        .inv
+                        .get(&resource::Resource::Stone)
+                        .unwrap_or(&0),
                     empire.id
                 );
             }

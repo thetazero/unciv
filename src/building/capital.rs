@@ -18,6 +18,6 @@ pub fn production(capital: &Capital) -> Vec<(resource::Resource, i32)> {
     ]
 }
 
-pub fn name() -> String {
+pub fn name(capital: &Capital) -> String {
     "Capital".to_string()
 }
