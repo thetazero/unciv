@@ -6,7 +6,7 @@ use rand::seq::IteratorRandom;
 use std::collections::HashMap;
 
 use crate::config::CONFIG;
-use crate::{colors, empire, tile, ui, building};
+use crate::{building, colors, empire, tile, ui};
 
 fn compute_tile_kind(height: f64, biome: f64) -> tile::TileKind {
     if height < -0.1 {
@@ -63,9 +63,9 @@ fn add_empire_data(tile_data: &mut Vec<tile::Tile>, number_of_empires: i32) {
 
         if tile::is_spawnable(&chosen_tile.kind) && chosen_tile.owner.is_none() {
             chosen_tile.owner = Some(spawned_empires);
-            chosen_tile.buildings.push(
-                building::Building::Capital(building::capital::Capital::default())
-            );
+            chosen_tile.buildings.push(building::Building::Capital(
+                building::capital::Capital::default(),
+            ));
             spawned_empires += 1;
         }
 
