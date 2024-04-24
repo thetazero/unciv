@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{colors::dark_hue, building};
+use crate::{building, colors::dark_hue};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum TileKind {
@@ -18,6 +18,16 @@ pub fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<
         TileKind::Mountain => tile_resources.materials.mountain.clone(),
         TileKind::SnowyMountain => tile_resources.materials.snowy_mountain.clone(),
         TileKind::Water => tile_resources.materials.water.clone(),
+    }
+}
+
+pub fn tile_string(kind: &TileKind) -> String {
+    match kind {
+        TileKind::Desert => "Desert".to_string(),
+        TileKind::Forest => "Forest".to_string(),
+        TileKind::Mountain => "Mountain".to_string(),
+        TileKind::SnowyMountain => "Snowy Mountain".to_string(),
+        TileKind::Water => "Water".to_string(),
     }
 }
 

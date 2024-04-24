@@ -126,6 +126,11 @@ pub fn update_selection(
     }
 }
 
+fn tile_to_string(tile: &tile::Tile) -> String {
+    let kind = tile::tile_string(&tile.kind);
+    format!("{}: ({}, {})", kind, tile.x, tile.y)
+}
+
 pub fn update_inspector(
     ui_state: ResMut<UiState>,
     mut inspector_query: Query<&mut Text, With<InspectorTitle>>,
@@ -138,7 +143,7 @@ pub fn update_inspector(
             let (_, tile) = tile_query.get(entity).unwrap();
 
             for mut text in inspector_query.iter_mut() {
-                let mut string_to_display = format!("Tile: ({}, {})", tile.x, tile.y);
+                let mut string_to_display = tile_to_string(tile);
 
                 if let Some(empire_id) = tile.owner {
                     let empire_entity = world_state.empires.get(&empire_id).unwrap();
@@ -153,7 +158,7 @@ pub fn update_inspector(
         }
         None => {
             for mut text in inspector_query.iter_mut() {
-                text.sections[0].value = "Tile: (0, 0)\nUnowned".to_string();
+                text.sections[0].value = "No tile selected".to_string();
             }
         }
     }
