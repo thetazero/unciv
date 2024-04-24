@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::colors::dark_hue;
+use crate::{colors::dark_hue, building};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum TileKind {
@@ -27,6 +27,7 @@ pub struct Tile {
     pub y: i32,
     pub kind: TileKind,
     pub owner: Option<i32>,
+    pub buildings: Vec<building::Building>,
 }
 
 struct TileMaterials {
