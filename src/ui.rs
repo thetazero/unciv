@@ -173,29 +173,20 @@ pub fn update_tile_inspector(
         (With<TileInspectorBuildingList>, Without<TileInspectorTitle>),
     >,
     tile_query: Query<(Entity, &tile::Tile)>,
-    empire_query: Query<(Entity, &empire::Empire)>,
-    world_state: Res<world_gen::WorldState>,
 ) {
     match ui_state.selected_tile {
         Some(entity) => {
             let (_, tile) = tile_query.get(entity).unwrap();
 
-            let mut string_to_display = tile_to_string(tile);
-
-            if let Some(empire_id) = tile.owner {
-                let empire_entity = world_state.empires.get(&empire_id).unwrap();
-                let (_, empire) = empire_query.get(*empire_entity).unwrap();
-                string_to_display.push_str(&format!("\nEmpire: {}", empire.id));
-            } else {
-                string_to_display.push_str("\nUnowned");
-            }
+            let string_to_display = tile_to_string(tile);
 
             set_query_text(&mut tile_title_query, &string_to_display);
 
-            let building_list : Vec<String> = tile
+            let building_list: Vec<String> = tile
                 .buildings
                 .iter()
-                .map(|building| building::building_name(building)).collect();
+                .map(|building| building::building_name(building))
+                .collect();
 
             let building_list = building_list.join("\t");
 
@@ -228,7 +219,8 @@ pub fn update_empire_panel(
 
             for mut text in resources_inspector_query.iter_mut() {
                 text.sections[0].value = format!(
-                    "Wood: {}\nStone: {}\nEmpire: {}",
+                    "Empire: {}\nWood: {}\nStone: {}",
+                    empire.id,
                     empire
                         .inventory
                         .inv
@@ -239,7 +231,6 @@ pub fn update_empire_panel(
                         .inv
                         .get(&resource::Resource::Stone)
                         .unwrap_or(&0),
-                    empire.id
                 );
             }
         }

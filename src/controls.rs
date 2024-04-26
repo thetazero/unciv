@@ -47,3 +47,10 @@ pub fn handle_keyboard(
         transform.translation.y += delta_y * time.delta_seconds() * scale_magnitude;
     }
 }
+
+pub fn move_camera_to(mut camera: Query<&mut Transform, With<Camera2d>>, target: Transform) {
+    for mut transform in camera.iter_mut() {
+        transform.translation.x = target.translation.x;
+        transform.translation.y = target.translation.y;    
+    }
+}

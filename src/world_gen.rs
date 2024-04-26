@@ -6,7 +6,7 @@ use rand::seq::IteratorRandom;
 use std::collections::HashMap;
 
 use crate::config::CONFIG;
-use crate::{building, colors, empire, tile, ui};
+use crate::{building, colors, controls, empire, tile, ui};
 
 fn compute_tile_kind(height: f64, biome: f64) -> tile::TileKind {
     if height < -0.1 {
@@ -86,6 +86,7 @@ pub fn spawn(
     mut commands: Commands,
     tile_resources: Res<tile::TileResources>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    camera: Query<&mut Transform, With<Camera2d>>,
 ) {
     let mut world_state = WorldState {
         tiles: HashMap::new(),
@@ -121,22 +122,30 @@ pub fn spawn(
         color_list.push(color);
     }
 
+    let mut camera_spawn_point = None;
+
     for tile in tile_data.iter() {
         let material = match tile.owner {
             Some(empire_id) => color_list.get(empire_id as usize).unwrap().clone(),
             None => tile::tile_material(&tile.kind, &tile_resources),
         };
 
+        let tile_location = Transform::from_xyz(
+            tile.x as f32 * (tile::TILE_SIZE + 1.),
+            tile.y as f32 * (tile::TILE_SIZE + 1.),
+            0.0,
+        );
+
+        if tile.owner == Some(0) {
+            camera_spawn_point = Some(tile_location);
+        }
+
         let tile_bundle = (
             tile.clone(),
             MaterialMesh2dBundle {
                 mesh: Mesh2dHandle(tile_resources.square.clone()),
                 material,
-                transform: Transform::from_xyz(
-                    tile.x as f32 * (tile::TILE_SIZE + 1.),
-                    tile.y as f32 * (tile::TILE_SIZE + 1.),
-                    0.0,
-                ),
+                transform: tile_location,
                 ..default()
             },
             PickableBundle::default(),
@@ -151,4 +160,8 @@ pub fn spawn(
     }
 
     commands.insert_resource(world_state);
+
+    if let Some(camera_spawn_point) = camera_spawn_point {
+        controls::move_camera_to(camera, camera_spawn_point);
+    }
 }
