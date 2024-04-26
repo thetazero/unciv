@@ -1,33 +1,8 @@
 use bevy::prelude::*;
-use bevy_mod_picking::prelude::*;
 
-use crate::{building, empire, resource, tile, world_gen};
-
-#[derive(Resource)]
-pub struct UiState {
-    pub selected_tile: Option<Entity>,
-    pub selected_empire: Option<Entity>,
-}
-
+use crate::{building, empire, resource, tile, controls};
 #[derive(Component)]
 pub struct ResourceUi;
-
-pub fn init_state(mut commands: Commands, world_state: ResMut<world_gen::WorldState>) {
-    match world_state.empires.get(&0) {
-        Some(entity) => {
-            commands.insert_resource(UiState {
-                selected_tile: None,
-                selected_empire: Some(*entity),
-            });
-        }
-        None => {
-            commands.insert_resource(UiState {
-                selected_tile: None,
-                selected_empire: None,
-            });
-        }
-    }
-}
 
 pub fn init(mut commands: Commands) {
     commands
@@ -170,21 +145,6 @@ fn init_builder_tab(root: &mut ChildBuilder) {
     });
 }
 
-pub fn update_selection(
-    mut ev_inspect: EventReader<InspectEvent>,
-    mut ui_state: ResMut<UiState>,
-    tile_query: Query<(Entity, &tile::Tile)>,
-    world_state: Res<world_gen::WorldState>,
-) {
-    for ev in ev_inspect.read() {
-        ui_state.selected_tile = Some(ev.0);
-        let (_, tile) = tile_query.get(ev.0).unwrap();
-        if let Some(owner) = tile.owner {
-            let empire_entity = world_state.empires.get(&owner).unwrap();
-            ui_state.selected_empire = Some(*empire_entity);
-        }
-    }
-}
 
 fn tile_to_string(tile: &tile::Tile) -> String {
     let kind = tile::tile_string(&tile.kind);
@@ -192,7 +152,7 @@ fn tile_to_string(tile: &tile::Tile) -> String {
 }
 
 pub fn update_tile_inspector(
-    ui_state: ResMut<UiState>,
+    ui_state: ResMut<controls::SelectorState>,
     mut tile_title_query: Query<
         &mut Text,
         (With<TileInspectorTitle>, Without<TileInspectorBuildingList>),
@@ -238,7 +198,7 @@ fn set_query_text<T: bevy::ecs::query::QueryFilter>(
 }
 
 pub fn update_empire_panel(
-    ui_state: ResMut<UiState>,
+    ui_state: ResMut<controls::SelectorState>,
     mut resources_inspector_query: Query<&mut Text, With<ResourceUi>>,
     empire_query: Query<&empire::Empire>,
 ) {
@@ -268,15 +228,6 @@ pub fn update_empire_panel(
                 text.sections[0].value = "No empire selected".to_string();
             }
         }
-    }
-}
-
-#[derive(Event)]
-pub struct InspectEvent(Entity);
-
-impl From<ListenerInput<Pointer<Click>>> for InspectEvent {
-    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
-        InspectEvent(event.target)
     }
 }
 

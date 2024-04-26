@@ -2,6 +2,9 @@ use bevy::{
     prelude::*,
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
+use bevy_mod_picking::prelude::*;
+
+use crate::controls;
 
 pub mod settler;
 
@@ -48,6 +51,7 @@ pub fn spawn<'a, 'b>(
             ..default()
         },
         unit,
+        On::<Pointer<Click>>::send_event::<controls::SelectUnit>(),
     ));
 
     commands

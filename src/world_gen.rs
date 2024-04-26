@@ -6,7 +6,7 @@ use rand::seq::IteratorRandom;
 use std::collections::HashMap;
 
 use crate::config::CONFIG;
-use crate::{building, colors, controls, empire, tile, ui, unit};
+use crate::{building, colors, controls, empire, tile, unit};
 
 fn compute_tile_kind(height: f64, biome: f64) -> tile::TileKind {
     if height < -0.1 {
@@ -154,7 +154,7 @@ pub fn spawn(
                 transform.translation.x += drag.delta.x; // Make the square follow the mouse
                 transform.translation.y -= drag.delta.y;
             }),
-            On::<Pointer<Click>>::send_event::<ui::InspectEvent>(),
+            On::<Pointer<Click>>::send_event::<controls::InspectTileEvent>(),
         );
         let tile_entity = commands.spawn(tile_bundle);
         world_state.tiles.insert((tile.x, tile.y), tile_entity.id());

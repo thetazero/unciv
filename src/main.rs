@@ -32,7 +32,7 @@ fn main() {
             ui::setup_fps_counter,
             (setup, add_resources, tick::init_tick),
             world_gen::spawn,
-            ui::init_state,
+            controls::init_state,
             (ui::init, ui::init_tile_inspector),
         )
             .chain(),
@@ -41,7 +41,7 @@ fn main() {
         Update,
         ((
             controls::handle_keyboard,
-            ui::update_selection,
+            controls::update_selection,
             (ui::update_tile_inspector, ui::update_empire_panel),
             (ui::fps_text_update_system, ui::fps_counter_showhide),
             tick::tick_world,
@@ -49,7 +49,8 @@ fn main() {
             .chain(),
     );
 
-    app.add_event::<ui::InspectEvent>();
+    app.add_event::<controls::InspectTileEvent>();
+    app.add_event::<controls::SelectUnit>();
 
     app.run();
 }
