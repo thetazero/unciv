@@ -57,10 +57,14 @@ pub struct TileResources {
 
 pub const TILE_SIZE: f32 = 50.;
 
-pub fn create_tile_resources(
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-) -> TileResources {
+pub fn create_tile_resources<'a, 'b>(
+    mut materials: ResMut<'a, Assets<ColorMaterial>>,
+    mut meshes: ResMut<'b, Assets<Mesh>>,
+) -> (
+    TileResources,
+    ResMut<'a, Assets<ColorMaterial>>,
+    ResMut<'b, Assets<Mesh>>,
+) {
     let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
     let desert = materials.add(Color::hsl(47., 0.29, 0.49));
     let forest: Handle<ColorMaterial> = materials.add(dark_hue(0.4));
@@ -70,17 +74,21 @@ pub fn create_tile_resources(
 
     let square: Handle<Mesh> = meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE));
 
-    TileResources {
-        materials: TileMaterials {
-            desert,
-            forest,
-            mountain,
-            snowy_mountain,
-            water,
+    (
+        TileResources {
+            materials: TileMaterials {
+                desert,
+                forest,
+                mountain,
+                snowy_mountain,
+                water,
+            },
+            empire_red,
+            square,
         },
-        empire_red,
-        square,
-    }
+        materials,
+        meshes,
+    )
 }
 
 pub fn is_spawnable(kind: &TileKind) -> bool {

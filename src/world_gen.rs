@@ -6,7 +6,7 @@ use rand::seq::IteratorRandom;
 use std::collections::HashMap;
 
 use crate::config::CONFIG;
-use crate::{building, colors, controls, empire, tile, ui};
+use crate::{building, colors, controls, empire, tile, ui, unit};
 
 fn compute_tile_kind(height: f64, biome: f64) -> tile::TileKind {
     if height < -0.1 {
@@ -87,6 +87,7 @@ pub fn spawn(
     tile_resources: Res<tile::TileResources>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     camera: Query<&mut Transform, With<Camera2d>>,
+    unit_resources: Res<unit::UnitResources>,
 ) {
     let mut world_state = WorldState {
         tiles: HashMap::new(),
@@ -164,4 +165,10 @@ pub fn spawn(
     if let Some(camera_spawn_point) = camera_spawn_point {
         controls::move_camera_to(camera, camera_spawn_point);
     }
+
+    let _commands = unit::spawn(
+        commands,
+        unit_resources,
+        unit::Unit::Settler(unit::settler::Settler::default()),
+    );
 }

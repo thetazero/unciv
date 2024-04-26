@@ -11,6 +11,7 @@ mod resource;
 mod tick;
 mod tile;
 mod ui;
+mod unit;
 mod utils;
 mod world_gen;
 
@@ -58,7 +59,11 @@ fn add_resources(
     materials: ResMut<Assets<ColorMaterial>>,
     meshes: ResMut<Assets<Mesh>>,
 ) {
-    commands.insert_resource(tile::create_tile_resources(materials, meshes));
+    let (tile_resources, materials, meshes) = tile::create_tile_resources(materials, meshes);
+    commands.insert_resource(tile_resources);
+
+    let (unit_resources, _materials, _meshes) = unit::create_resources(materials, meshes);
+    commands.insert_resource(unit_resources);
 }
 
 fn setup(

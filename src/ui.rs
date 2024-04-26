@@ -123,34 +123,51 @@ pub fn init_tile_inspector(mut commands: Commands) {
                     ));
                 });
 
-            parent
-                .spawn(NodeBundle {
-                    style: Style {
-                        width: Val::Percent(50.0),
-                        border: UiRect::all(Val::Px(2.)),
-                        ..default()
-                    },
-                    background_color: Color::rgb(0.08, 0.08, 0.08).into(),
-                    ..default()
-                })
-                .with_children(|parent| {
-                    parent.spawn((
-                        TileInspectorBuildingList,
-                        TextBundle::from_section(
-                            "Building List",
-                            TextStyle {
-                                font_size: 20.0,
-                                ..default()
-                            },
-                        )
-                        .with_style(Style {
-                            margin: UiRect::all(Val::Px(5.)),
-                            ..default()
-                        }),
-                        Label,
-                    ));
-                });
+            init_builder_tab(parent);
         });
+}
+
+fn init_builder_tab(root: &mut ChildBuilder) {
+    root.spawn(NodeBundle {
+        style: Style {
+            width: Val::Percent(50.0),
+            border: UiRect::all(Val::Px(2.)),
+            padding: UiRect::all(Val::Px(10.)),
+            ..default()
+        },
+        background_color: Color::rgb(0.1, 0.1, 0.1).into(),
+        ..default()
+    })
+    .with_children(|parent| {
+        parent
+            .spawn(NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    border: UiRect::all(Val::Px(2.)),
+                    ..default()
+                },
+                background_color: Color::rgb(0.15, 0.15, 0.15).into(),
+                ..default()
+            })
+            .with_children(|parent| {
+                parent.spawn((
+                    TileInspectorBuildingList,
+                    TextBundle::from_section(
+                        "Building List",
+                        TextStyle {
+                            font_size: 20.0,
+                            ..default()
+                        },
+                    )
+                    .with_style(Style {
+                        margin: UiRect::all(Val::Px(5.)),
+                        ..default()
+                    }),
+                    Label,
+                ));
+            });
+    });
 }
 
 pub fn update_selection(
