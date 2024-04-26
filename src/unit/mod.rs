@@ -1,9 +1,19 @@
-use bevy::{prelude::*, sprite::{MaterialMesh2dBundle, Mesh2dHandle}};
+use bevy::{
+    prelude::*,
+    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
+};
 
 pub mod settler;
 
 #[derive(Component)]
-pub enum Unit {
+pub struct Unit {
+    pub kind: UnitKind,
+    pub x: i32,
+    pub y: i32,
+    pub owner: Option<i32>,
+}
+
+pub enum UnitKind {
     Settler(settler::Settler),
 }
 

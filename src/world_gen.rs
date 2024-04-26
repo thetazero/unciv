@@ -169,6 +169,11 @@ pub fn spawn(
     let _commands = unit::spawn(
         commands,
         unit_resources,
-        unit::Unit::Settler(unit::settler::Settler::default()),
+        unit::Unit {
+            kind: unit::UnitKind::Settler(unit::settler::Settler::default()),
+            x: 0,
+            y: 0,
+            owner: Some(0),
+        },
     );
 }
