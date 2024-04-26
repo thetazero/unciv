@@ -13,11 +13,11 @@ impl Default for Capital {
 
 pub fn production(capital: &Capital) -> Vec<(resource::Resource, i32)> {
     vec![
-        (resource::Resource::Wood, 1),
-        (resource::Resource::Stone, 1),
+        (resource::Resource::Wood, 1 * capital.level),
+        (resource::Resource::Stone, 1 * capital.level),
     ]
 }
 
 pub fn name(capital: &Capital) -> String {
-    "Capital".to_string()
+    format!("Capital {}", capital.level)
 }

@@ -195,7 +195,7 @@ pub fn update_tile_inspector(
             let building_list : Vec<String> = tile
                 .buildings
                 .iter()
-                .map(|building| building::building_name(building)).collect();;
+                .map(|building| building::building_name(building)).collect();
 
             let building_list = building_list.join("\t");
 

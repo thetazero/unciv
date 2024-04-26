@@ -25,7 +25,7 @@ pub const fn default_config() -> Config {
         camera: CameraConfig {
             pan_speed: 200.0,
             zoom_speed: 1.4,
-            max_zoom: Vec3::new(5.0, 5.0, 5.0),
+            max_zoom: Vec3::new(6.0, 6.0, 6.0),
             min_zoom: Vec3::new(0.4, 0.4, 0.4),
         },
         world_size: (100, 100),
