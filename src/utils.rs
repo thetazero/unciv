@@ -17,3 +17,25 @@
 
 //     return Some(empire);
 // }
+
+use std::ops::AddAssign;
+
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub struct Coordinates {
+    pub x: i32,
+    pub y: i32,
+}
+
+impl AddAssign for Coordinates {
+    fn add_assign(&mut self, other: Self) {
+        self.x += other.x;
+        self.y += other.y;
+    }
+}
+
+pub fn to_world_location(coordinates: &Coordinates) -> (f32, f32) {
+    (
+        coordinates.x as f32 * (crate::tile::TILE_SIZE + 1.),
+        coordinates.y as f32 * (crate::tile::TILE_SIZE + 1.),
+    )
+}

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::{config::CONFIG, tile, unit, world_gen};
+use crate::{config::CONFIG, tile, unit, utils, world_gen};
 
 #[derive(Resource)]
 pub struct SelectorState {
@@ -86,7 +86,7 @@ pub fn update_selection(
     mut ev_inspect: EventReader<InspectTileEvent>,
     mut unit_inspect: EventReader<SelectUnit>,
     mut selector_state: ResMut<SelectorState>,
-    mut unit_query: Query<&mut Transform, With<unit::Unit>>,
+    mut unit_query: Query<&mut unit::Unit>,
     tile_query: Query<(Entity, &tile::Tile)>,
     world_state: Res<world_gen::WorldState>,
 ) {
@@ -99,12 +99,12 @@ pub fn update_selection(
         }
 
         if let Some(unit) = selector_state.selected_unit {
-            let mut unit_transform = unit_query.get_mut(unit).unwrap();
+            let mut unit = unit_query.get_mut(unit).unwrap();
 
-            unit_transform.translation.x = tile.x as f32 * (tile::TILE_SIZE as f32 + 1.);
-            unit_transform.translation.y = tile.y as f32 * (tile::TILE_SIZE as f32 + 1.);
-
-            selector_state.selected_unit = None;
+            unit.target = Some(utils::Coordinates {
+                x: tile.x,
+                y: tile.y,
+            });
         }
     }
 
@@ -129,8 +129,6 @@ pub struct SelectUnit {
 
 impl From<ListenerInput<Pointer<Click>>> for SelectUnit {
     fn from(event: ListenerInput<Pointer<Click>>) -> Self {
-        SelectUnit {
-            unit: event.target,
-        }
+        SelectUnit { unit: event.target }
     }
 }

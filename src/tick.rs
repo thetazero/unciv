@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
 
-use crate::{building, empire, resource, tile, world_gen};
+use crate::{building, empire, resource, tile, unit, utils, world_gen};
 
 #[derive(Resource)]
 pub struct TickState {
@@ -16,12 +16,36 @@ pub fn init_tick(mut commands: Commands) {
     })
 }
 
+fn tick_units(mut units: Query<(&mut Transform, &mut unit::Unit)>) {
+    for res in units.iter_mut() {
+        let (mut transform, mut unit) = res;
+        if let Some(target) = &unit.target {
+            if target == &unit.location {
+                unit.target = None;
+            } else {
+                let delta = utils::Coordinates {
+                    x: (target.x - unit.location.x).clamp(-1, 1),
+                    y: (target.y - unit.location.y).clamp(-1, 1),
+                };
+
+                unit.location += delta;
+
+                let (x, y) = utils::to_world_location(&unit.location);
+
+                transform.translation.x = x;
+                transform.translation.y = y;
+            }
+        }
+    }
+}
+
 pub fn tick_world(
     mut tile_query: Query<&tile::Tile>,
     mut empire_query: Query<&mut empire::Empire>,
     time: ResMut<Time>,
     mut tick_state: ResMut<TickState>,
     world_state: ResMut<world_gen::WorldState>,
+    units: Query<(&mut Transform, &mut unit::Unit)>,
 ) {
     tick_state.stop_watch.tick(time.delta());
 
@@ -30,6 +54,8 @@ pub fn tick_world(
     } else {
         tick_state.stop_watch.reset();
     }
+
+    tick_units(units);
 
     for tile in tile_query.iter_mut() {
         if let Some(owner) = tile.owner {

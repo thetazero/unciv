@@ -4,20 +4,31 @@ use bevy::{
 };
 use bevy_mod_picking::prelude::*;
 
-use crate::controls;
+use crate::{controls, utils};
 
 pub mod settler;
 
 #[derive(Component)]
 pub struct Unit {
     pub kind: UnitKind,
-    pub x: i32,
-    pub y: i32,
+    pub location: utils::Coordinates,
+    pub target: Option<utils::Coordinates>,
     pub owner: Option<i32>,
 }
 
 pub enum UnitKind {
     Settler(settler::Settler),
+}
+
+impl Default for Unit {
+    fn default() -> Self {
+        Unit {
+            kind: UnitKind::Settler(settler::Settler::default()),
+            location: utils::Coordinates { x: 0, y: 0 },
+            target: None,
+            owner: None,
+        }
+    }
 }
 
 #[derive(Resource)]

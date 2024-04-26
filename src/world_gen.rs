@@ -6,7 +6,7 @@ use rand::seq::IteratorRandom;
 use std::collections::HashMap;
 
 use crate::config::CONFIG;
-use crate::{building, colors, controls, empire, tile, unit};
+use crate::{building, colors, controls, empire, tile, unit, utils};
 
 fn compute_tile_kind(height: f64, biome: f64) -> tile::TileKind {
     if height < -0.1 {
@@ -170,10 +170,8 @@ pub fn spawn(
         commands,
         unit_resources,
         unit::Unit {
-            kind: unit::UnitKind::Settler(unit::settler::Settler::default()),
-            x: 0,
-            y: 0,
-            owner: Some(0),
+            location: utils::Coordinates { x: 0, y: 0 },
+            ..Default::default()
         },
     );
 }
