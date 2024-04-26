@@ -12,12 +12,24 @@ pub struct UiState {
 #[derive(Component)]
 pub struct ResourceUi;
 
-pub fn init(mut commands: Commands) {
-    commands.insert_resource(UiState {
-        selected_tile: None,
-        selected_empire: None,
-    });
+pub fn init_state(mut commands: Commands, world_state: ResMut<world_gen::WorldState>) {
+    match world_state.empires.get(&0) {
+        Some(entity) => {
+            commands.insert_resource(UiState {
+                selected_tile: None,
+                selected_empire: Some(*entity),
+            });
+        }
+        None => {
+            commands.insert_resource(UiState {
+                selected_tile: None,
+                selected_empire: None,
+            });
+        }
+    }
+}
 
+pub fn init(mut commands: Commands) {
     commands
         .spawn(NodeBundle {
             style: Style {

@@ -31,6 +31,7 @@ fn main() {
             ui::setup_fps_counter,
             (setup, add_resources, tick::init_tick),
             world_gen::spawn,
+            ui::init_state,
             (ui::init, ui::init_tile_inspector),
         )
             .chain(),
