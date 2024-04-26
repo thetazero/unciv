@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::{config::CONFIG, tile, world_gen};
+use crate::{config::CONFIG, tile, unit, world_gen};
 
 #[derive(Resource)]
 pub struct SelectorState {
@@ -86,6 +86,7 @@ pub fn update_selection(
     mut ev_inspect: EventReader<InspectTileEvent>,
     mut unit_inspect: EventReader<SelectUnit>,
     mut selector_state: ResMut<SelectorState>,
+    mut unit_query: Query<&mut Transform, With<unit::Unit>>,
     tile_query: Query<(Entity, &tile::Tile)>,
     world_state: Res<world_gen::WorldState>,
 ) {
@@ -96,10 +97,18 @@ pub fn update_selection(
             let empire_entity = world_state.empires.get(&owner).unwrap();
             selector_state.selected_empire = Some(*empire_entity);
         }
+
+        if let Some(unit) = selector_state.selected_unit {
+            let mut unit_transform = unit_query.get_mut(unit).unwrap();
+
+            unit_transform.translation.x = tile.x as f32 * (tile::TILE_SIZE as f32 + 1.);
+            unit_transform.translation.y = tile.y as f32 * (tile::TILE_SIZE as f32 + 1.);
+
+            selector_state.selected_unit = None;
+        }
     }
 
     for ev in unit_inspect.read() {
-        println!("Unit selected: {:?}", ev.unit);
         selector_state.selected_unit = Some(ev.unit);
     }
 }
