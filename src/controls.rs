@@ -103,10 +103,7 @@ pub fn update_selection(
         if let Some(unit) = selector_state.selected_unit {
             let mut unit = unit_query.get_mut(unit).unwrap();
 
-            unit.target = Some(utils::Coordinates {
-                x: tile.x,
-                y: tile.y,
-            });
+            unit.target = Some(tile.location);
         }
 
         if let Some(unit_enity) = selector_state.selected_unit {
@@ -121,9 +118,15 @@ pub fn update_selection(
     }
 
     for ev in unit_inspect.read() {
-        if let Some(old_unit) = selector_state.selected_unit { // Deselect old unit
-            (commands, selector_state) =
-                deselect_unit(commands, selector_state, &unit_query, old_unit, &unit_resources);
+        if let Some(old_unit) = selector_state.selected_unit {
+            // Deselect old unit
+            (commands, selector_state) = deselect_unit(
+                commands,
+                selector_state,
+                &unit_query,
+                old_unit,
+                &unit_resources,
+            );
         }
 
         let unit_entity = ev.unit;

@@ -1,4 +1,4 @@
-// use bevy::prelude::*;
+use bevy::prelude::*;
 
 // use crate::{empire, world_gen};
 
@@ -20,7 +20,7 @@
 
 use std::ops::AddAssign;
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug, Hash, Copy)]
 pub struct Coordinates {
     pub x: i32,
     pub y: i32,
@@ -38,4 +38,10 @@ pub fn to_world_location(coordinates: &Coordinates) -> (f32, f32) {
         coordinates.x as f32 * (crate::tile::TILE_SIZE + 1.),
         coordinates.y as f32 * (crate::tile::TILE_SIZE + 1.),
     )
+}
+
+pub fn to_transform(coordinates: &Coordinates) -> Transform {
+    let (x, y) = to_world_location(coordinates);
+
+    Transform::from_translation(Vec3::new(x, y, 0.))
 }

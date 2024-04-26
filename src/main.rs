@@ -20,8 +20,9 @@ fn main() {
 
     app.add_plugins(DefaultPlugins.set(low_latency_window_plugin()))
         .add_plugins(DefaultPickingPlugins)
-        .add_plugins(FrameTimeDiagnosticsPlugin::default())
-        .insert_resource(DebugPickingMode::Normal);
+        .add_plugins(FrameTimeDiagnosticsPlugin::default());
+
+    // app.insert_resource(DebugPickingMode::Normal);
 
     // app.add_systems(Startup, ui::setup_fps_counter);
     // app.add_systems(Update, (ui::fps_text_update_system, ui::fps_counter_showhide));

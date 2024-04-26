@@ -1,6 +1,12 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
+    utils::HashMap,
+};
 
-use crate::{building, colors::dark_hue};
+use bevy_mod_picking::prelude::*;
+
+use crate::{building, colors::dark_hue, controls, utils};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum TileKind {
@@ -33,8 +39,7 @@ pub fn tile_string(kind: &TileKind) -> String {
 
 #[derive(Component, Clone)]
 pub struct Tile {
-    pub x: i32,
-    pub y: i32,
+    pub location: utils::Coordinates,
     pub kind: TileKind,
     pub owner: Option<i32>,
     pub buildings: Vec<building::Building>,
@@ -46,6 +51,7 @@ struct TileMaterials {
     pub mountain: Handle<ColorMaterial>,
     pub snowy_mountain: Handle<ColorMaterial>,
     pub water: Handle<ColorMaterial>,
+    pub empire_colors: HashMap<i32, Handle<ColorMaterial>>,
 }
 
 #[derive(Resource)]
@@ -74,6 +80,12 @@ pub fn create_tile_resources<'a, 'b>(
 
     let square: Handle<Mesh> = meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE));
 
+    let mut empire_colors = HashMap::default();
+
+    for i in 0..10 {
+        empire_colors.insert(i, materials.add(Color::hsl(i as f32 * 36.0, 0.5, 0.5)));
+    }
+
     (
         TileResources {
             materials: TileMaterials {
@@ -82,6 +94,7 @@ pub fn create_tile_resources<'a, 'b>(
                 mountain,
                 snowy_mountain,
                 water,
+                empire_colors,
             },
             empire_red,
             square,
@@ -96,4 +109,43 @@ pub fn is_spawnable(kind: &TileKind) -> bool {
         TileKind::Forest | TileKind::Mountain => true,
         _ => false,
     }
+}
+
+pub fn make_bundle<'a, 'b>(
+    tile_resources: &Res<TileResources>,
+    tile: &Tile,
+) -> (
+    Tile,
+    MaterialMesh2dBundle<ColorMaterial>,
+    PickableBundle,
+    On<Pointer<Drag>>,
+    On<Pointer<Click>>,
+) {
+    let material = match tile.owner {
+        Some(empire_id) => tile_resources
+            .materials
+            .empire_colors
+            .get(&(empire_id % 10))
+            .unwrap()
+            .clone(),
+        None => tile_material(&tile.kind, &tile_resources),
+    };
+
+    let tile_location = utils::to_transform(&tile.location);
+
+    (
+        tile.clone(),
+        MaterialMesh2dBundle {
+            mesh: Mesh2dHandle(tile_resources.square.clone()),
+            material,
+            transform: tile_location,
+            ..default()
+        },
+        PickableBundle::default(),
+        On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
+            transform.translation.x += drag.delta.x; // Make the square follow the mouse
+            transform.translation.y -= drag.delta.y;
+        }),
+        On::<Pointer<Click>>::send_event::<controls::InspectTileEvent>(),
+    )
 }

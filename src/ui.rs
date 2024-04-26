@@ -148,7 +148,7 @@ fn init_builder_tab(root: &mut ChildBuilder) {
 
 fn tile_to_string(tile: &tile::Tile) -> String {
     let kind = tile::tile_string(&tile.kind);
-    format!("{}: ({}, {})", kind, tile.x, tile.y)
+    format!("{}: ({}, {})", kind, tile.location.x, tile.location.y)
 }
 
 pub fn update_tile_inspector(

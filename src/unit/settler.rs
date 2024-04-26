@@ -27,7 +27,7 @@ pub fn init_resources<'a, 'b>(
     let mesh = meshes.add(Mesh::from(Circle { radius: 20.0 }));
 
     let color = materials.add(Color::hsl(0., 0.8, 0.5));
-    let selected_color = materials.add(Color::hsl(0., 0.8, 0.3));
+    let selected_color = materials.add(Color::hsl(0., 0.8, 0.7));
 
     (
         SettlerResources {

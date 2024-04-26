@@ -1,6 +1,4 @@
 use bevy::prelude::*;
-use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
-use bevy_mod_picking::prelude::*;
 use noise::{NoiseFn, Simplex};
 use rand::seq::IteratorRandom;
 use std::collections::HashMap;
@@ -42,8 +40,7 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
 
             let kind: tile::TileKind = compute_tile_kind(height, biome);
             tiles.push(tile::Tile {
-                x,
-                y,
+                location: utils::Coordinates { x, y },
                 kind: kind.clone(),
                 owner: None,
                 buildings: vec![],
@@ -78,7 +75,7 @@ fn add_empire_data(tile_data: &mut Vec<tile::Tile>, number_of_empires: i32) {
 
 #[derive(Resource)]
 pub struct WorldState {
-    pub tiles: HashMap<(i32, i32), Entity>,
+    pub tiles: HashMap<utils::Coordinates, Entity>,
     pub empires: HashMap<i32, Entity>,
 }
 
@@ -126,49 +123,21 @@ pub fn spawn(
     let mut camera_spawn_point = None;
 
     for tile in tile_data.iter() {
-        let material = match tile.owner {
-            Some(empire_id) => color_list.get(empire_id as usize).unwrap().clone(),
-            None => tile::tile_material(&tile.kind, &tile_resources),
-        };
-
-        let tile_location = Transform::from_xyz(
-            tile.x as f32 * (tile::TILE_SIZE + 1.),
-            tile.y as f32 * (tile::TILE_SIZE + 1.),
-            0.0,
-        );
-
         if tile.owner == Some(0) {
             commands = unit::spawn(
                 commands,
                 &unit_resources,
                 unit::Unit {
-                    location: utils::Coordinates {
-                        x: tile.x,
-                        y: tile.y,
-                    },
+                    location: tile.location,
                     ..Default::default()
                 },
             );
-            camera_spawn_point = Some(tile_location);
+            camera_spawn_point = Some(utils::to_transform(&tile.location));
         }
 
-        let tile_bundle = (
-            tile.clone(),
-            MaterialMesh2dBundle {
-                mesh: Mesh2dHandle(tile_resources.square.clone()),
-                material,
-                transform: tile_location,
-                ..default()
-            },
-            PickableBundle::default(),
-            On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
-                transform.translation.x += drag.delta.x; // Make the square follow the mouse
-                transform.translation.y -= drag.delta.y;
-            }),
-            On::<Pointer<Click>>::send_event::<controls::InspectTileEvent>(),
-        );
+        let tile_bundle = tile::make_bundle(&tile_resources, tile);
         let tile_entity = commands.spawn(tile_bundle);
-        world_state.tiles.insert((tile.x, tile.y), tile_entity.id());
+        world_state.tiles.insert(tile.location, tile_entity.id());
     }
 
     commands.insert_resource(world_state);
