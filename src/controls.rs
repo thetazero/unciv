@@ -121,12 +121,12 @@ pub fn update_selection(
     }
 
     for ev in unit_inspect.read() {
-        if let Some(unit) = selector_state.selected_unit {
+        if let Some(old_unit) = selector_state.selected_unit { // Deselect old unit
             (commands, selector_state) =
-                deselect_unit(commands, selector_state, &unit_query, unit, &unit_resources);
+                deselect_unit(commands, selector_state, &unit_query, old_unit, &unit_resources);
         }
+
         let unit_entity = ev.unit;
-        selector_state.selected_unit = Some(unit_entity);
 
         (commands, selector_state) = select_unit(
             commands,
@@ -140,7 +140,7 @@ pub fn update_selection(
 
 fn deselect_unit<'a, 'b, 'c>(
     mut commands: Commands<'a, 'b>,
-    selector_state: ResMut<'c, SelectorState>,
+    mut selector_state: ResMut<'c, SelectorState>,
     unit_query: &Query<&mut unit::Unit>,
     unit_entity: Entity,
     unit_resources: &Res<unit::UnitResources>,
@@ -151,12 +151,14 @@ fn deselect_unit<'a, 'b, 'c>(
         .entity(unit_entity)
         .insert(unit::get_normal_material(&unit, &unit_resources));
 
+    selector_state.selected_unit = None;
+
     (commands, selector_state)
 }
 
 fn select_unit<'a, 'b, 'c>(
     mut commands: Commands<'a, 'b>,
-    selector_state: ResMut<'c, SelectorState>,
+    mut selector_state: ResMut<'c, SelectorState>,
     unit_query: &Query<&mut unit::Unit>,
     unit_entity: Entity,
     unit_resources: &Res<unit::UnitResources>,
@@ -166,6 +168,8 @@ fn select_unit<'a, 'b, 'c>(
     commands
         .entity(unit_entity)
         .insert(unit::get_selected_material(&unit, &unit_resources));
+
+    selector_state.selected_unit = Some(unit_entity);
 
     (commands, selector_state)
 }
