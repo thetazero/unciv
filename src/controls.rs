@@ -83,12 +83,14 @@ pub fn move_camera_to(mut camera: Query<&mut Transform, With<Camera2d>>, target:
 }
 
 pub fn update_selection(
+    mut commands: Commands,
     mut ev_inspect: EventReader<InspectTileEvent>,
     mut unit_inspect: EventReader<SelectUnit>,
     mut selector_state: ResMut<SelectorState>,
     mut unit_query: Query<&mut unit::Unit>,
     tile_query: Query<(Entity, &tile::Tile)>,
     world_state: Res<world_gen::WorldState>,
+    unit_resources: Res<unit::UnitResources>,
 ) {
     for ev in ev_inspect.read() {
         selector_state.selected_tile = Some(ev.0);
@@ -106,11 +108,66 @@ pub fn update_selection(
                 y: tile.y,
             });
         }
+
+        if let Some(unit_enity) = selector_state.selected_unit {
+            (commands, selector_state) = deselect_unit(
+                commands,
+                selector_state,
+                &unit_query,
+                unit_enity,
+                &unit_resources,
+            );
+        }
     }
 
     for ev in unit_inspect.read() {
-        selector_state.selected_unit = Some(ev.unit);
+        if let Some(unit) = selector_state.selected_unit {
+            (commands, selector_state) =
+                deselect_unit(commands, selector_state, &unit_query, unit, &unit_resources);
+        }
+        let unit_entity = ev.unit;
+        selector_state.selected_unit = Some(unit_entity);
+
+        (commands, selector_state) = select_unit(
+            commands,
+            selector_state,
+            &unit_query,
+            unit_entity,
+            &unit_resources,
+        );
     }
+}
+
+fn deselect_unit<'a, 'b, 'c>(
+    mut commands: Commands<'a, 'b>,
+    selector_state: ResMut<'c, SelectorState>,
+    unit_query: &Query<&mut unit::Unit>,
+    unit_entity: Entity,
+    unit_resources: &Res<unit::UnitResources>,
+) -> (Commands<'a, 'b>, ResMut<'c, SelectorState>) {
+    let unit = unit_query.get(unit_entity).unwrap();
+
+    commands
+        .entity(unit_entity)
+        .insert(unit::get_normal_material(&unit, &unit_resources));
+
+    (commands, selector_state)
+}
+
+fn select_unit<'a, 'b, 'c>(
+    mut commands: Commands<'a, 'b>,
+    selector_state: ResMut<'c, SelectorState>,
+    unit_query: &Query<&mut unit::Unit>,
+    unit_entity: Entity,
+    unit_resources: &Res<unit::UnitResources>,
+) -> (Commands<'a, 'b>, ResMut<'c, SelectorState>) {
+    let unit = unit_query.get(unit_entity).unwrap();
+
+    commands
+        .entity(unit_entity)
+        .insert(unit::get_selected_material(&unit, &unit_resources));
+
+    (commands, selector_state)
 }
 
 #[derive(Event)]

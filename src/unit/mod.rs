@@ -69,3 +69,26 @@ pub fn spawn<'a, 'b>(
 
     commands
 }
+
+trait UnitTrait {
+    fn get_normal_material(&self, unit_resources: &Res<UnitResources>) -> Handle<ColorMaterial>;
+    fn get_selected_material(&self, unit_resources: &Res<UnitResources>) -> Handle<ColorMaterial>;
+}
+
+pub fn get_selected_material(
+    unit: &Unit,
+    unit_resources: &Res<UnitResources>,
+) -> Handle<ColorMaterial> {
+    match &unit.kind {
+        UnitKind::Settler(settler) => settler.get_selected_material(unit_resources),
+    }
+}
+
+pub fn get_normal_material(
+    unit: &Unit,
+    unit_resources: &Res<UnitResources>,
+) -> Handle<ColorMaterial> {
+    match &unit.kind {
+        UnitKind::Settler(settler) => settler.get_normal_material(unit_resources),
+    }
+}

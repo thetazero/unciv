@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use super::UnitTrait;
+
 pub struct Settler {}
 
 impl Default for Settler {
@@ -11,6 +13,7 @@ impl Default for Settler {
 pub struct SettlerResources {
     pub mesh: Handle<Mesh>,
     pub color: Handle<ColorMaterial>,
+    pub selected_color: Handle<ColorMaterial>,
 }
 
 pub fn init_resources<'a, 'b>(
@@ -23,7 +26,29 @@ pub fn init_resources<'a, 'b>(
 ) {
     let mesh = meshes.add(Mesh::from(Circle { radius: 20.0 }));
 
-    let color = materials.add(Color::rgb(1.0, 1.0, 0.0));
+    let color = materials.add(Color::hsl(0., 0.8, 0.5));
+    let selected_color = materials.add(Color::hsl(0., 0.8, 0.3));
 
-    (SettlerResources { mesh, color }, materials, meshes)
+    (
+        SettlerResources {
+            mesh,
+            color,
+            selected_color,
+        },
+        materials,
+        meshes,
+    )
+}
+
+impl UnitTrait for Settler {
+    fn get_normal_material(
+        &self,
+        unit_resources: &Res<super::UnitResources>,
+    ) -> Handle<ColorMaterial> {
+        return unit_resources.settler.color.clone();
+    }
+
+    fn get_selected_material(&self, unit_resources: &Res<super::UnitResources>) -> Handle<ColorMaterial> {
+        return unit_resources.settler.selected_color.clone();
+    }
 }
