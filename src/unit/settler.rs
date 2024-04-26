@@ -21,7 +21,7 @@ pub fn init_resources<'a, 'b>(
     ResMut<'a, Assets<ColorMaterial>>,
     ResMut<'b, Assets<Mesh>>,
 ) {
-    let mesh = meshes.add(Mesh::from(Circle { radius: 25.0 }));
+    let mesh = meshes.add(Mesh::from(Circle { radius: 20.0 }));
 
     let color = materials.add(Color::rgb(1.0, 1.0, 0.0));
 

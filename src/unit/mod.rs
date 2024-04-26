@@ -51,14 +51,16 @@ pub fn create_resources<'a, 'b>(
 
 pub fn spawn<'a, 'b>(
     mut commands: Commands<'a, 'b>,
-    unit_resources: Res<UnitResources>,
+    unit_resources: &Res<UnitResources>,
     unit: Unit,
 ) -> Commands<'a, 'b> {
+    let (x, y) = utils::to_world_location(&unit.location);
+
     commands.spawn((
         MaterialMesh2dBundle {
             mesh: Mesh2dHandle(unit_resources.settler.mesh.clone()),
             material: unit_resources.settler.color.clone(),
-            transform: Transform::from_xyz(0.0, 0.0, 1.),
+            transform: Transform::from_xyz(x, y, 1.),
             ..default()
         },
         unit,

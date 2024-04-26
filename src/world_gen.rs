@@ -138,6 +138,17 @@ pub fn spawn(
         );
 
         if tile.owner == Some(0) {
+            commands = unit::spawn(
+                commands,
+                &unit_resources,
+                unit::Unit {
+                    location: utils::Coordinates {
+                        x: tile.x,
+                        y: tile.y,
+                    },
+                    ..Default::default()
+                },
+            );
             camera_spawn_point = Some(tile_location);
         }
 
@@ -165,13 +176,4 @@ pub fn spawn(
     if let Some(camera_spawn_point) = camera_spawn_point {
         controls::move_camera_to(camera, camera_spawn_point);
     }
-
-    let _commands = unit::spawn(
-        commands,
-        unit_resources,
-        unit::Unit {
-            location: utils::Coordinates { x: 0, y: 0 },
-            ..Default::default()
-        },
-    );
 }
