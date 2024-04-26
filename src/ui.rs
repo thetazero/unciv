@@ -172,7 +172,7 @@ pub fn update_tile_inspector(
             set_query_text(&mut tile_title_query, &string_to_display);
 
             let building_list: Vec<String> = tile
-                .buildings
+                .building
                 .iter()
                 .map(|building| building::building_name(building))
                 .collect();

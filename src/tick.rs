@@ -63,7 +63,7 @@ pub fn tick_world(
             let mut empire: Mut<'_, empire::Empire> =
                 empire_query.get_mut(owner_entity.clone()).unwrap();
 
-            for building in tile.buildings.iter() {
+            if let Some(building) = &tile.building {
                 let production = building::building_production(building);
                 for (resource, amount) in production {
                     empire = add_item(empire, resource, amount);

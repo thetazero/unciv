@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::{config::CONFIG, tile, unit, utils, world_gen};
+use crate::{config::CONFIG, tile, unit, world_gen};
 
 #[derive(Resource)]
 pub struct SelectorState {

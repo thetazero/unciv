@@ -42,7 +42,7 @@ pub struct Tile {
     pub location: utils::Coordinates,
     pub kind: TileKind,
     pub owner: Option<i32>,
-    pub buildings: Vec<building::Building>,
+    pub building: Option<building::Building>,
 }
 
 struct TileMaterials {
