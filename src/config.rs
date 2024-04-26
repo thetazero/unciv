@@ -23,7 +23,7 @@ pub struct Config {
 pub const fn default_config() -> Config {
     Config {
         camera: CameraConfig {
-            pan_speed: 200.0,
+            pan_speed: 300.0,
             zoom_speed: 1.4,
             max_zoom: Vec3::new(7.0, 7.0, 7.0),
             min_zoom: Vec3::new(0.4, 0.4, 0.4),

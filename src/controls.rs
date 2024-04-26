@@ -5,6 +5,7 @@ use crate::{config::CONFIG, tile, world_gen};
 
 #[derive(Resource)]
 pub struct SelectorState {
+    pub selected_unit: Option<Entity>,
     pub selected_tile: Option<Entity>,
     pub selected_empire: Option<Entity>,
 }
@@ -13,19 +14,20 @@ pub fn init_state(mut commands: Commands, world_state: ResMut<world_gen::WorldSt
     match world_state.empires.get(&0) {
         Some(entity) => {
             commands.insert_resource(SelectorState {
+                selected_unit: None,
                 selected_tile: None,
                 selected_empire: Some(*entity),
             });
         }
         None => {
             commands.insert_resource(SelectorState {
+                selected_unit: None,
                 selected_tile: None,
                 selected_empire: None,
             });
         }
     }
 }
-
 
 pub fn handle_keyboard(
     mut camera: Query<&mut Transform, With<Camera2d>>,
@@ -82,17 +84,23 @@ pub fn move_camera_to(mut camera: Query<&mut Transform, With<Camera2d>>, target:
 
 pub fn update_selection(
     mut ev_inspect: EventReader<InspectTileEvent>,
-    mut ui_state: ResMut<SelectorState>,
+    mut unit_inspect: EventReader<SelectUnit>,
+    mut selector_state: ResMut<SelectorState>,
     tile_query: Query<(Entity, &tile::Tile)>,
     world_state: Res<world_gen::WorldState>,
 ) {
     for ev in ev_inspect.read() {
-        ui_state.selected_tile = Some(ev.0);
+        selector_state.selected_tile = Some(ev.0);
         let (_, tile) = tile_query.get(ev.0).unwrap();
         if let Some(owner) = tile.owner {
             let empire_entity = world_state.empires.get(&owner).unwrap();
-            ui_state.selected_empire = Some(*empire_entity);
+            selector_state.selected_empire = Some(*empire_entity);
         }
+    }
+
+    for ev in unit_inspect.read() {
+        println!("Unit selected: {:?}", ev.unit);
+        selector_state.selected_unit = Some(ev.unit);
     }
 }
 
@@ -105,12 +113,15 @@ impl From<ListenerInput<Pointer<Click>>> for InspectTileEvent {
     }
 }
 
-
 #[derive(Event)]
-pub struct SelectUnit(Entity);
+pub struct SelectUnit {
+    pub unit: Entity,
+}
 
 impl From<ListenerInput<Pointer<Click>>> for SelectUnit {
     fn from(event: ListenerInput<Pointer<Click>>) -> Self {
-        SelectUnit(event.target)
+        SelectUnit {
+            unit: event.target,
+        }
     }
 }
