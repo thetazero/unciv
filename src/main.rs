@@ -64,8 +64,11 @@ fn add_resources(
     let (tile_resources, materials, meshes) = tile::create_tile_resources(materials, meshes);
     commands.insert_resource(tile_resources);
 
-    let (unit_resources, _materials, _meshes) = unit::create_resources(materials, meshes);
+    let (unit_resources, materials, meshes) = unit::create_resources(materials, meshes);
     commands.insert_resource(unit_resources);
+
+    let (building_resources, _materials, _meshes) = building::create_building_resources(materials, meshes);
+    commands.insert_resource(building_resources);
 }
 
 fn setup(

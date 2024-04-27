@@ -95,9 +95,8 @@ pub fn handle_keyboard(
                         }
                         None => {
                             tile.owner = Some(0);
-                            tile.building = Some(building::Building::City(
-                                building::city::City::default(),
-                            ));
+                            tile.building =
+                                Some(building::Building::City(building::city::City::default()));
 
                             selector_state.selected_unit = None;
 

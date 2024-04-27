@@ -1,4 +1,6 @@
-use crate::resource;
+use bevy::prelude::*;
+
+use crate::{resource, tile};
 
 use super::BuildingTrait;
 
@@ -23,5 +25,30 @@ impl BuildingTrait for Capital {
 
     fn name(&self) -> String {
         format!("Capital {}", self.level)
+    }
+
+    fn get_material(
+        &self,
+        building_resources: bevy::prelude::Res<super::BuildingResources>,
+    ) -> bevy::prelude::Handle<bevy::prelude::ColorMaterial> {
+        building_resources.capital_material.clone()
+    }
+
+    fn get_mesh(
+        &self,
+        building_resources: bevy::prelude::Res<super::BuildingResources>,
+    ) -> bevy::prelude::Handle<bevy::prelude::Mesh> {
+        building_resources.capital_mesh.clone()
+    }
+
+    fn load_mesh() -> Mesh {
+        Rectangle::new(tile::TILE_SIZE, tile::TILE_SIZE).into()
+    }
+
+    fn load_material() -> ColorMaterial {
+        ColorMaterial {
+            color: Color::hsl(0.0, 0.0, 0.5),
+            texture: None,
+        }
     }
 }
