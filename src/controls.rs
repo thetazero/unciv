@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::{config::CONFIG, tile, unit, world_gen};
+use crate::{building, config::CONFIG, tile, unit, world_gen};
 
 #[derive(Resource)]
 pub struct SelectorState {
@@ -30,10 +30,15 @@ pub fn init_state(mut commands: Commands, world_state: ResMut<world_gen::WorldSt
 }
 
 pub fn handle_keyboard(
+    mut commands: Commands,
     mut camera: Query<&mut Transform, With<Camera2d>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
     time: Res<Time>,
+    world_state: Res<world_gen::WorldState>,
+    mut selector_state: ResMut<SelectorState>,
+    unit_query: Query<&unit::Unit>,
+    mut tile_query: Query<&mut tile::Tile>,
 ) {
     if keyboard_input.just_pressed(CONFIG.keys.quit) {
         app_exit_events.send(bevy::app::AppExit);
@@ -72,6 +77,36 @@ pub fn handle_keyboard(
 
         transform.translation.x += delta_x * time.delta_seconds() * scale_magnitude;
         transform.translation.y += delta_y * time.delta_seconds() * scale_magnitude;
+    }
+
+    if keyboard_input.just_pressed(CONFIG.keys.action) {
+        println!("Action key pressed");
+        if let Some(unit_entity) = selector_state.selected_unit {
+            let unit = unit_query.get(unit_entity).unwrap();
+
+            match unit.kind {
+                unit::UnitKind::Settler(_) => {
+                    let tile_entity = world_state.tiles.get(&unit.location).unwrap();
+                    let mut tile = tile_query.get_mut(*tile_entity).unwrap();
+
+                    match &tile.building {
+                        Some(_) => {
+                            println!("Can't settle over a building");
+                        }
+                        None => {
+                            tile.owner = Some(0);
+                            tile.building = Some(building::Building::City(
+                                building::city::City::default(),
+                            ));
+
+                            selector_state.selected_unit = None;
+
+                            commands.entity(unit_entity).despawn();
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -1,5 +1,7 @@
 use crate::resource;
 
+use super::BuildingTrait;
+
 #[derive(Clone)]
 pub struct Capital {
     level: i32,
@@ -11,13 +13,15 @@ impl Default for Capital {
     }
 }
 
-pub fn production(capital: &Capital) -> Vec<(resource::Resource, i32)> {
-    vec![
-        (resource::Resource::Wood, 1 * capital.level),
-        (resource::Resource::Stone, 1 * capital.level),
-    ]
-}
+impl BuildingTrait for Capital {
+    fn production(&self) -> Vec<(resource::Resource, i32)> {
+        vec![
+            (resource::Resource::Wood, 1 * self.level),
+            (resource::Resource::Stone, 1 * self.level),
+        ]
+    }
 
-pub fn name(capital: &Capital) -> String {
-    format!("Capital {}", capital.level)
+    fn name(&self) -> String {
+        format!("Capital {}", self.level)
+    }
 }

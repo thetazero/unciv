@@ -5,6 +5,7 @@ pub struct KeyBinds {
     pub quit: KeyCode,
     pub zoom_in: KeyCode,
     pub zoom_out: KeyCode,
+    pub action: KeyCode,
 }
 
 pub struct CameraConfig {
@@ -33,6 +34,7 @@ pub const fn default_config() -> Config {
             quit: KeyCode::CapsLock,
             zoom_in: KeyCode::Equal,
             zoom_out: KeyCode::Minus,
+            action: KeyCode::Enter,
         },
     }
 }
