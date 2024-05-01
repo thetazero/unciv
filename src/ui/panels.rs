@@ -33,7 +33,6 @@ pub fn init(mut commands: Commands) {
                     parent
                         .spawn(NodeBundle {
                             style: Style {
-                                border: UiRect::all(Val::Px(2.)),
                                 margin: UiRect::all(Val::Px(10.)),
                                 display: Display::Grid,
                                 ..default()
@@ -62,7 +61,6 @@ pub fn init(mut commands: Commands) {
                     parent
                         .spawn(NodeBundle {
                             style: Style {
-                                border: UiRect::all(Val::Px(2.)),
                                 margin: UiRect::all(Val::Px(10.)),
                                 display: Display::Grid,
                                 ..default()
@@ -78,9 +76,18 @@ pub fn init(mut commands: Commands) {
 }
 
 fn init_entity_spawner_tab(parent: &mut ChildBuilder) {
-    parent.spawn(button::make_bundle()).with_children(|parent| {
-        parent.spawn(button::make_text("End Turn".to_string()));
+    parent.spawn(button::make_button()).with_children(|parent| {
+        parent.spawn(button::make_button_text("Settler".to_string()));
     });
+    // parent.spawn(button::make_button()).with_children(|parent| {
+    //     parent.spawn(button::make_button_text("End Turn".to_string()));
+    // });
+    // parent.spawn(button::make_button()).with_children(|parent| {
+    //     parent.spawn(button::make_button_text("End Turn".to_string()));
+    // });
+    // parent.spawn(button::make_button()).with_children(|parent| {
+    //     parent.spawn(button::make_button_text("End Turn".to_string()));
+    // });
 }
 
 #[derive(Component)]
