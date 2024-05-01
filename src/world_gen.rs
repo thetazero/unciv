@@ -136,19 +136,16 @@ pub fn spawn(
             camera_spawn_point = Some(utils::to_transform(&tile.location));
         }
 
-        if let Some(building) = &tile.building {
-            let building_bundle = building::make_bundle(
-                building,
-                &tile.location,
-                &building_resources,
-                tile.location,
-            );
-            commands.spawn(building_bundle);
-        }
-
         let tile_bundle = tile::make_bundle(&tile_resources, tile);
         let tile_entity = commands.spawn(tile_bundle);
-        world_state.tiles.insert(tile.location, tile_entity.id());
+        let tile_id = tile_entity.id();
+        world_state.tiles.insert(tile.location, tile_id);
+
+        if let Some(building) = &tile.building {
+            let building_bundle = building::make_bundle(building, &building_resources);
+            let building_id = commands.spawn(building_bundle).id();
+            commands.entity(tile_id).push_children(&[building_id]);
+        }
     }
 
     commands.insert_resource(world_state);

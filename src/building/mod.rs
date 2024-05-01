@@ -2,6 +2,7 @@ use bevy::{
     prelude::*,
     sprite::{MaterialMesh2dBundle, Mesh2dHandle},
 };
+use bevy_mod_picking::PickableBundle;
 
 use crate::{resource, utils};
 
@@ -90,20 +91,19 @@ pub fn building_material(
 
 pub fn make_bundle(
     building: &Building,
-    location: &utils::Coordinates,
     building_resources: &Res<BuildingResources>,
-    tile_location: utils::Coordinates,
-) -> (utils::Coordinates, MaterialMesh2dBundle<ColorMaterial>) {
-    let mut transform = utils::to_transform(location);
-    transform.translation.z = 2.;
+) -> (MaterialMesh2dBundle<ColorMaterial>, PickableBundle) {
+    // let mut transform = utils::to_transform(location);
+    // transform.translation.z = 2.;
+    let transform = Transform::from_xyz(0., 0., 2.);
 
     (
-        tile_location,
         MaterialMesh2dBundle {
             mesh: Mesh2dHandle(building_mesh(building, building_resources)),
             material: building_material(building, building_resources),
             transform,
             ..default()
         },
+        PickableBundle::default(),
     )
 }

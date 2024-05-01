@@ -39,6 +39,7 @@ pub fn handle_keyboard(
     mut selector_state: ResMut<SelectorState>,
     unit_query: Query<&unit::Unit>,
     mut tile_query: Query<&mut tile::Tile>,
+    building_resources: Res<building::BuildingResources>,
 ) {
     if keyboard_input.just_pressed(CONFIG.keys.quit) {
         app_exit_events.send(bevy::app::AppExit);
@@ -95,12 +96,18 @@ pub fn handle_keyboard(
                         }
                         None => {
                             tile.owner = Some(0);
-                            tile.building =
-                                Some(building::Building::City(building::city::City::default()));
+                            let building =
+                                building::Building::City(building::city::City::default());
+                            tile.building = Some(building.clone());
 
                             selector_state.selected_unit = None;
 
                             commands.entity(unit_entity).despawn();
+
+                            let building_bundle =
+                                building::make_bundle(&building, &building_resources);
+                            let building_id = commands.spawn(building_bundle).id();
+                            commands.entity(*tile_entity).push_children(&[building_id]);
                         }
                     }
                 }
@@ -122,32 +129,40 @@ pub fn update_selection(
     mut unit_inspect: EventReader<SelectUnit>,
     mut selector_state: ResMut<SelectorState>,
     mut unit_query: Query<&mut unit::Unit>,
-    tile_query: Query<(Entity, &tile::Tile)>,
+    tile_query: Query<&tile::Tile>,
     world_state: Res<world_gen::WorldState>,
     unit_resources: Res<unit::UnitResources>,
 ) {
     for ev in ev_inspect.read() {
-        selector_state.selected_tile = Some(ev.0);
-        let (_, tile) = tile_query.get(ev.0).unwrap();
-        if let Some(owner) = tile.owner {
-            let empire_entity = world_state.empires.get(&owner).unwrap();
-            selector_state.selected_empire = Some(*empire_entity);
-        }
+        let tile = tile_query.get(ev.0);
 
-        if let Some(unit) = selector_state.selected_unit {
-            let mut unit = unit_query.get_mut(unit).unwrap();
+        match tile {
+            Ok(tile) => {
+                selector_state.selected_tile = Some(ev.0);
+                if let Some(owner) = tile.owner {
+                    let empire_entity = world_state.empires.get(&owner).unwrap();
+                    selector_state.selected_empire = Some(*empire_entity);
+                }
 
-            unit.target = Some(tile.location);
-        }
+                if let Some(unit) = selector_state.selected_unit {
+                    let mut unit = unit_query.get_mut(unit).unwrap();
 
-        if let Some(unit_enity) = selector_state.selected_unit {
-            (commands, selector_state) = deselect_unit(
-                commands,
-                selector_state,
-                &unit_query,
-                unit_enity,
-                &unit_resources,
-            );
+                    unit.target = Some(tile.location);
+                }
+
+                if let Some(unit_enity) = selector_state.selected_unit {
+                    (commands, selector_state) = deselect_unit(
+                        commands,
+                        selector_state,
+                        &unit_query,
+                        unit_enity,
+                        &unit_resources,
+                    );
+                }
+            }
+            Err(_) => {
+                println!("Tile not found")
+            }
         }
     }
 
