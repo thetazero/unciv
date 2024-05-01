@@ -30,11 +30,11 @@ fn main() {
     app.add_systems(
         Startup,
         (
-            ui::setup_fps_counter,
+            ui::fps::setup,
             (setup, add_resources, tick::init_tick),
             world_gen::spawn,
             controls::init_state,
-            (ui::init, ui::init_tile_inspector),
+            (ui::panels::init, ui::panels::init_tile_inspector),
         )
             .chain(),
     )
@@ -43,8 +43,15 @@ fn main() {
         ((
             controls::handle_keyboard,
             controls::update_selection,
-            (ui::update_tile_inspector, ui::update_empire_panel),
-            (ui::fps_text_update_system, ui::fps_counter_showhide),
+            (
+                ui::panels::update_tile_inspector,
+                ui::panels::update_empire_panel,
+                ui::button::button_system,
+            ),
+            (
+                ui::fps::fps_text_update_system,
+                ui::fps::fps_counter_showhide,
+            ),
             tick::tick_world,
         ))
             .chain(),
@@ -67,7 +74,8 @@ fn add_resources(
     let (unit_resources, materials, meshes) = unit::create_resources(materials, meshes);
     commands.insert_resource(unit_resources);
 
-    let (building_resources, _materials, _meshes) = building::create_building_resources(materials, meshes);
+    let (building_resources, _materials, _meshes) =
+        building::create_building_resources(materials, meshes);
     commands.insert_resource(building_resources);
 }
 

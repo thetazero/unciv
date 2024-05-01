@@ -4,7 +4,7 @@ use bevy::{
 };
 use bevy_mod_picking::PickableBundle;
 
-use crate::{resource, utils};
+use crate::resource;
 
 pub mod capital;
 pub mod city;
@@ -93,8 +93,6 @@ pub fn make_bundle(
     building: &Building,
     building_resources: &Res<BuildingResources>,
 ) -> (MaterialMesh2dBundle<ColorMaterial>, PickableBundle) {
-    // let mut transform = utils::to_transform(location);
-    // transform.translation.z = 2.;
     let transform = Transform::from_xyz(0., 0., 2.);
 
     (

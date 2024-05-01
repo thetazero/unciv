@@ -37,7 +37,7 @@ impl BuildingTrait for City {
 
     fn load_material() -> ColorMaterial {
         ColorMaterial {
-            color: Color::hsl(0.0, 0.0, 0.5),
+            color: Color::hsl(30.0, 0.3, 0.5),
             texture: None,
         }
     }
