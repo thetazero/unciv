@@ -231,7 +231,8 @@ pub struct InspectTileEvent(Entity);
 
 impl From<ListenerInput<Pointer<Click>>> for InspectTileEvent {
     fn from(event: ListenerInput<Pointer<Click>>) -> Self {
-        InspectTileEvent(event.target)
+        let listener = event.listener();
+        InspectTileEvent(listener)
     }
 }
 
