@@ -111,7 +111,7 @@ pub fn is_spawnable(kind: &TileKind) -> bool {
     }
 }
 
-pub fn make_bundle<'a, 'b>(
+pub fn make_bundle(
     tile_resources: &Res<TileResources>,
     tile: &Tile,
 ) -> (

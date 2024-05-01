@@ -20,7 +20,7 @@ use bevy::prelude::*;
 
 use std::ops::AddAssign;
 
-#[derive(PartialEq, Eq, Clone, Debug, Hash, Copy)]
+#[derive(PartialEq, Eq, Clone, Debug, Hash, Copy, Component)]
 pub struct Coordinates {
     pub x: i32,
     pub y: i32,

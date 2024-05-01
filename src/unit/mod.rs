@@ -60,7 +60,7 @@ pub fn spawn<'a, 'b>(
         MaterialMesh2dBundle {
             mesh: Mesh2dHandle(unit_resources.settler.mesh.clone()),
             material: unit_resources.settler.color.clone(),
-            transform: Transform::from_xyz(x, y, 1.),
+            transform: Transform::from_xyz(x, y, 10.),
             ..default()
         },
         unit,

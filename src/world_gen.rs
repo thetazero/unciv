@@ -82,6 +82,7 @@ pub struct WorldState {
 pub fn spawn(
     mut commands: Commands,
     tile_resources: Res<tile::TileResources>,
+    building_resources: Res<building::BuildingResources>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     camera: Query<&mut Transform, With<Camera2d>>,
     unit_resources: Res<unit::UnitResources>,
@@ -133,6 +134,16 @@ pub fn spawn(
                 },
             );
             camera_spawn_point = Some(utils::to_transform(&tile.location));
+        }
+
+        if let Some(building) = &tile.building {
+            let building_bundle = building::make_bundle(
+                building,
+                &tile.location,
+                &building_resources,
+                tile.location,
+            );
+            commands.spawn(building_bundle);
         }
 
         let tile_bundle = tile::make_bundle(&tile_resources, tile);

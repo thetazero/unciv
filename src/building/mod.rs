@@ -1,6 +1,9 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
+};
 
-use crate::resource;
+use crate::{resource, utils};
 
 pub mod capital;
 pub mod city;
@@ -14,8 +17,8 @@ pub enum Building {
 trait BuildingTrait {
     fn production(&self) -> Vec<(resource::Resource, i32)>;
     fn name(&self) -> String;
-    fn get_mesh(&self, building_resources: Res<BuildingResources>) -> Handle<Mesh>;
-    fn get_material(&self, building_resources: Res<BuildingResources>) -> Handle<ColorMaterial>;
+    fn get_mesh(&self, building_resources: &Res<BuildingResources>) -> Handle<Mesh>;
+    fn get_material(&self, building_resources: &Res<BuildingResources>) -> Handle<ColorMaterial>;
     fn load_mesh() -> Mesh;
     fn load_material() -> ColorMaterial;
 }
@@ -63,4 +66,44 @@ pub fn building_name(building: &Building) -> String {
         Building::Capital(capital) => capital.name(),
         Building::City(city) => city.name(),
     }
+}
+
+pub fn building_mesh(
+    building: &Building,
+    building_resources: &Res<BuildingResources>,
+) -> Handle<Mesh> {
+    match building {
+        Building::Capital(capital) => capital.get_mesh(building_resources),
+        Building::City(city) => city.get_mesh(building_resources),
+    }
+}
+
+pub fn building_material(
+    building: &Building,
+    building_resources: &Res<BuildingResources>,
+) -> Handle<ColorMaterial> {
+    match building {
+        Building::Capital(capital) => capital.get_material(building_resources),
+        Building::City(city) => city.get_material(building_resources),
+    }
+}
+
+pub fn make_bundle(
+    building: &Building,
+    location: &utils::Coordinates,
+    building_resources: &Res<BuildingResources>,
+    tile_location: utils::Coordinates,
+) -> (utils::Coordinates, MaterialMesh2dBundle<ColorMaterial>) {
+    let mut transform = utils::to_transform(location);
+    transform.translation.z = 2.;
+
+    (
+        tile_location,
+        MaterialMesh2dBundle {
+            mesh: Mesh2dHandle(building_mesh(building, building_resources)),
+            material: building_material(building, building_resources),
+            transform,
+            ..default()
+        },
+    )
 }

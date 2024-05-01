@@ -26,12 +26,12 @@ impl BuildingTrait for City {
 
     fn get_material(
         &self,
-        building_resources: Res<super::BuildingResources>,
+        building_resources: &Res<super::BuildingResources>,
     ) -> Handle<ColorMaterial> {
         building_resources.city_material.clone()
     }
 
-    fn get_mesh(&self, building_resources: Res<super::BuildingResources>) -> Handle<Mesh> {
+    fn get_mesh(&self, building_resources: &Res<super::BuildingResources>) -> Handle<Mesh> {
         building_resources.city_mesh.clone()
     }
 
@@ -43,6 +43,6 @@ impl BuildingTrait for City {
     }
 
     fn load_mesh() -> Mesh {
-        Rectangle::new(tile::TILE_SIZE, tile::TILE_SIZE).into()
+        Rectangle::new(tile::TILE_SIZE as f32 / 1.5, tile::TILE_SIZE as f32 / 1.5).into()
     }
 }

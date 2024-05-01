@@ -29,20 +29,20 @@ impl BuildingTrait for Capital {
 
     fn get_material(
         &self,
-        building_resources: bevy::prelude::Res<super::BuildingResources>,
-    ) -> bevy::prelude::Handle<bevy::prelude::ColorMaterial> {
+        building_resources: &Res<super::BuildingResources>,
+    ) -> Handle<ColorMaterial> {
         building_resources.capital_material.clone()
     }
 
     fn get_mesh(
         &self,
-        building_resources: bevy::prelude::Res<super::BuildingResources>,
+        building_resources: &Res<super::BuildingResources>,
     ) -> bevy::prelude::Handle<bevy::prelude::Mesh> {
         building_resources.capital_mesh.clone()
     }
 
     fn load_mesh() -> Mesh {
-        Rectangle::new(tile::TILE_SIZE, tile::TILE_SIZE).into()
+        Rectangle::new(tile::TILE_SIZE as f32 / 1.5, tile::TILE_SIZE as f32 / 1.5).into()
     }
 
     fn load_material() -> ColorMaterial {
