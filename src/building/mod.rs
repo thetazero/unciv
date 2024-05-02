@@ -91,7 +91,7 @@ pub fn make_bundle(
     building: &Building,
     building_resources: &Res<BuildingResources>,
 ) -> (MaterialMeshBundle<StandardMaterial>, PickableBundle) {
-    let transform = Transform::from_xyz(0., 0., TILE_SIZE as f32 / 1.);
+    let transform = Transform::from_xyz(0., 0., TILE_SIZE as f32 / 2.);
 
     (
         MaterialMeshBundle {

@@ -61,7 +61,7 @@ pub fn spawn<'a, 'b>(
         MaterialMeshBundle {
             mesh: unit_resources.settler.mesh.clone(),
             material: unit_resources.settler.color.clone(),
-            transform: Transform::from_xyz(x, y, TILE_SIZE as f32 * 2.),
+            transform: Transform::from_xyz(x, y, TILE_SIZE as f32 * 1.),
             ..default()
         },
         unit,

@@ -103,7 +103,7 @@ pub fn handle_keyboard(
 pub fn move_camera_to(mut camera: Query<&mut Transform, With<Camera3d>>, target: Transform) {
     for mut transform in camera.iter_mut() {
         transform.translation = target.translation;
-        transform.translation.z = 1000.;
+        transform.translation.z = CONFIG.camera.max_z / 2.;
     }
 }
 

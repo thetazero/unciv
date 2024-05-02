@@ -36,6 +36,7 @@ pub fn tile_string(kind: &TileKind) -> String {
 #[derive(Component, Clone)]
 pub struct Tile {
     pub location: utils::Coordinates,
+    pub height: f32,
     pub kind: TileKind,
     pub owner: Option<i32>,
     pub building: Option<building::Building>,
@@ -57,7 +58,7 @@ pub struct TileResources {
     pub square: Handle<Mesh>,
 }
 
-pub const TILE_SIZE: f32 = 50.;
+pub const TILE_SIZE: f32 = 1.;
 
 pub fn create_tile_resources<'a, 'b>(
     mut materials: ResMut<'a, Assets<StandardMaterial>>,
@@ -127,7 +128,9 @@ pub fn make_bundle(
         None => tile_material(&tile.kind, &tile_resources),
     };
 
-    let tile_location = utils::to_transform(&tile.location);
+    let mut tile_location = utils::to_transform(&tile.location);
+
+    tile_location.translation.z = tile.height;
 
     (
         tile.clone(),

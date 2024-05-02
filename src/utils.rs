@@ -35,8 +35,8 @@ impl AddAssign for Coordinates {
 
 pub fn to_world_location(coordinates: &Coordinates) -> (f32, f32) {
     (
-        coordinates.x as f32 * (crate::tile::TILE_SIZE + 1.),
-        coordinates.y as f32 * (crate::tile::TILE_SIZE + 1.),
+        coordinates.x as f32 * (crate::tile::TILE_SIZE),
+        coordinates.y as f32 * (crate::tile::TILE_SIZE),
     )
 }
 

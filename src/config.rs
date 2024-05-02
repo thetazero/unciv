@@ -25,8 +25,8 @@ pub const fn default_config() -> Config {
         camera: CameraConfig {
             pan_speed: 1.0,
             zoom_speed: 0.7,
-            max_z: 3000.,
-            min_z: 400.,
+            max_z: 60.,
+            min_z: 8.,
         },
         world_size: (100, 100),
         keys: KeyBinds {

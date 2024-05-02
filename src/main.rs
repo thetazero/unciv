@@ -88,9 +88,10 @@ fn setup(
     commands.spawn(Camera3dBundle::default());
 
     commands.spawn(DirectionalLightBundle {
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        transform: Transform::from_xyz(4.0, 8.0, 4.0).looking_at(Vec3::new(0.1, 0.1, 0.), Vec3::Y),
         directional_light: DirectionalLight {
             color: Color::WHITE,
+            shadows_enabled: true,
             ..default()
         },
         ..default()

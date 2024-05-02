@@ -4,6 +4,7 @@ use rand::seq::IteratorRandom;
 use std::collections::HashMap;
 
 use crate::config::CONFIG;
+use crate::tile::TILE_SIZE;
 use crate::{building, colors, controls, empire, tile, unit, utils};
 
 fn compute_tile_kind(height: f64, biome: f64) -> tile::TileKind {
@@ -41,6 +42,7 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
             let kind: tile::TileKind = compute_tile_kind(height, biome);
             tiles.push(tile::Tile {
                 location: utils::Coordinates { x, y },
+                height: (height as f32 * TILE_SIZE * 2.).max(0.),
                 kind: kind.clone(),
                 owner: None,
                 building: None,
