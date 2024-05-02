@@ -25,9 +25,7 @@ pub fn init_resources<'a, 'b>(
     ResMut<'a, Assets<StandardMaterial>>,
     ResMut<'b, Assets<Mesh>>,
 ) {
-    let mesh = meshes.add(
-        Sphere::new(tile::TILE_SIZE as f32 / 3.0)
-    );
+    let mesh = meshes.add(Sphere::new(tile::TILE_SIZE as f32 / 3.0));
 
     let color = materials.add(Color::hsl(0., 0.8, 0.5));
     let selected_color = materials.add(Color::hsl(0., 0.8, 0.7));
@@ -65,6 +63,11 @@ impl UnitTrait for Settler {
         tile_entity: Entity,
         acting_empire: i32,
     ) -> Vec<actions::Action> {
+        if !tile::is_spawnable(&tile.kind) {
+            println!("Can't build on this tile");
+
+            return vec![];
+        }
         match &tile.building {
             None => {
                 let capital = building::Building::City(building::city::City::default());
