@@ -3,7 +3,11 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::Stopwatch;
 
-use crate::{building, empire, resource, tile, unit, utils, world_gen};
+use crate::{
+    building, empire, resource,
+    tile::{self, TILE_SIZE},
+    unit, utils, world_gen,
+};
 
 #[derive(Resource)]
 pub struct TickState {
@@ -16,7 +20,11 @@ pub fn init_tick(mut commands: Commands) {
     })
 }
 
-fn tick_units(mut units: Query<(&mut Transform, &mut unit::Unit)>) {
+fn tick_units(
+    mut units: Query<(&mut Transform, &mut unit::Unit)>,
+    world_state: &ResMut<world_gen::WorldState>,
+    tiles: &Query<&tile::Tile>,
+) {
     for res in units.iter_mut() {
         let (mut transform, mut unit) = res;
         if let Some(target) = &unit.target {
@@ -36,6 +44,10 @@ fn tick_units(mut units: Query<(&mut Transform, &mut unit::Unit)>) {
                 transform.translation.y = y;
             }
         }
+
+        let tile_entity = world_state.tiles.get(&unit.location).unwrap();
+        let tile = tiles.get(*tile_entity).unwrap();
+        transform.translation.z = tile.height + TILE_SIZE / 1.;
     }
 }
 
@@ -55,7 +67,7 @@ pub fn tick_world(
         tick_state.stop_watch.reset();
     }
 
-    tick_units(units);
+    tick_units(units, &world_state, &tile_query);
 
     for tile in tile_query.iter_mut() {
         if let Some(owner) = tile.owner {
