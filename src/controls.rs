@@ -1,7 +1,7 @@
 use bevy::{input::mouse::MouseWheel, prelude::*};
 use bevy_mod_picking::prelude::*;
 
-use crate::{actions, building, config::CONFIG, tile, unit, world_gen};
+use crate::{actions, building, config::CONFIG, tile, unit, utils, world_gen};
 
 #[derive(Resource)]
 pub struct SelectorState {
@@ -40,7 +40,7 @@ pub fn handle_keyboard(
     unit_query: Query<&unit::Unit>,
     mut tile_query: Query<&mut tile::Tile>,
     building_resources: Res<building::BuildingResources>,
-    unit_resources: Res<unit::UnitResources>
+    unit_resources: Res<unit::UnitResources>,
 ) {
     if keyboard_input.just_pressed(CONFIG.keys.quit) {
         app_exit_events.send(bevy::app::AppExit);
@@ -251,11 +251,37 @@ pub fn handle_drag(
     mut drag_events: EventReader<DragEvent>,
     mut camera: Query<&mut Transform, With<Camera3d>>,
     time: Res<Time>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    selector_state: Res<SelectorState>,
+    tile_query: Query<&tile::Tile>,
 ) {
     for ev in drag_events.read() {
         for mut transform in camera.iter_mut() {
-            transform.translation.x -= ev.dx * time.delta_seconds() * transform.translation.z * CONFIG.camera.mouse_drag_pan_speed;
-            transform.translation.y += ev.dy * time.delta_seconds() * transform.translation.z * CONFIG.camera.mouse_drag_pan_speed;
+            let dx = ev.dx
+                * time.delta_seconds()
+                * transform.translation.z
+                * CONFIG.camera.mouse_drag_pan_speed;
+            let dy = ev.dy
+                * time.delta_seconds()
+                * transform.translation.z
+                * CONFIG.camera.mouse_drag_pan_speed;
+            if keyboard_input.pressed(KeyCode::ControlLeft)
+                || keyboard_input.pressed(KeyCode::ControlRight)
+            {
+                // rotate camera
+                if let Some(selected_tile) = selector_state.selected_tile {
+                    let tile_entity = selected_tile;
+                    let tile = tile_query.get(tile_entity).unwrap();
+                    let target_tile_translation = utils::to_transform(&tile.location);
+
+                    transform.rotation = transform
+                        .looking_at(target_tile_translation.translation, Vec3::Y)
+                        .rotation;
+                }
+            } else {
+            }
+            transform.translation.x -= dx;
+            transform.translation.y += dy;
         }
     }
 }
@@ -267,7 +293,8 @@ pub fn handle_mouse_scroll(
 ) {
     for ev in scroll_events.read() {
         for mut transform in camera.iter_mut() {
-            let mut z = transform.translation.z * (1. - ev.y * CONFIG.camera.mouse_wheel_zoom_speed * time.delta_seconds());
+            let mut z = transform.translation.z
+                * (1. - ev.y * CONFIG.camera.mouse_wheel_zoom_speed * time.delta_seconds());
             z = z.clamp(CONFIG.camera.min_z, CONFIG.camera.max_z);
             transform.translation.z = z;
         }
