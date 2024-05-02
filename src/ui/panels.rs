@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use super::button;
-use crate::{building, controls, empire, resource, tile};
+use crate::{actions, building, controls, empire, resource, tile};
 #[derive(Component)]
 pub struct ResourceUi;
 
@@ -76,15 +76,22 @@ fn init_entity_spawner_tab(parent: &mut ChildBuilder) {
             ..default()
         })
         .with_children(|parent| {
-            parent.spawn(button::make_button()).with_children(|parent| {
-                parent.spawn(button::make_button_text("Settler".to_string()));
-            });
-            parent.spawn(button::make_button()).with_children(|parent| {
-                parent.spawn(button::make_button_text("Stupid".to_string()));
-            });
-            parent.spawn(button::make_button()).with_children(|parent| {
-                parent.spawn(button::make_button_text("End Turn".to_string()));
-            });
+            let noop = actions::Action::Noop;
+            parent
+                .spawn(button::make_button(&noop))
+                .with_children(|parent| {
+                    parent.spawn(button::make_button_text("Settler".to_string()));
+                });
+            parent
+                .spawn(button::make_button(&noop))
+                .with_children(|parent| {
+                    parent.spawn(button::make_button_text("Stupid".to_string()));
+                });
+            parent
+                .spawn(button::make_button(&noop))
+                .with_children(|parent| {
+                    parent.spawn(button::make_button_text("End Turn".to_string()));
+                });
         });
 }
 

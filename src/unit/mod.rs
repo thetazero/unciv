@@ -9,7 +9,7 @@ use crate::{
 
 pub mod settler;
 
-#[derive(Component)]
+#[derive(Component, Clone, Debug)]
 pub struct Unit {
     pub kind: UnitKind,
     pub location: utils::Coordinates,
@@ -17,6 +17,7 @@ pub struct Unit {
     pub owner: Option<i32>,
 }
 
+#[derive(Clone, Debug)]
 pub enum UnitKind {
     Settler(settler::Settler),
 }
@@ -48,6 +49,28 @@ pub fn create_resources<'a, 'b>(
     let (settler, materials, meshes) = settler::init_resources(materials, meshes);
 
     (UnitResources { settler }, materials, meshes)
+}
+
+pub fn make_bundle(
+    unit: Unit,
+    unit_resources: &Res<UnitResources>,
+) -> (
+    MaterialMeshBundle<StandardMaterial>,
+    Unit,
+    On<Pointer<Click>>,
+) {
+    let (x, y) = utils::to_world_location(&unit.location);
+
+    (
+        MaterialMeshBundle {
+            mesh: unit_resources.settler.mesh.clone(),
+            material: unit_resources.settler.color.clone(),
+            transform: Transform::from_xyz(x, y, TILE_SIZE as f32 * 1.),
+            ..default()
+        },
+        unit,
+        On::<Pointer<Click>>::send_event::<controls::SelectUnit>(),
+    )
 }
 
 pub fn spawn<'a, 'b>(

@@ -40,6 +40,7 @@ pub fn handle_keyboard(
     unit_query: Query<&unit::Unit>,
     mut tile_query: Query<&mut tile::Tile>,
     building_resources: Res<building::BuildingResources>,
+    unit_resources: Res<unit::UnitResources>
 ) {
     if keyboard_input.just_pressed(CONFIG.keys.quit) {
         app_exit_events.send(bevy::app::AppExit);
@@ -92,8 +93,9 @@ pub fn handle_keyboard(
                     action,
                     tile_query,
                     selector_state,
-                    &building_resources,
                     commands,
+                    &building_resources,
+                    &unit_resources,
                 );
             }
         }

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use super::BuildingTrait;
 use crate::{resource, tile};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct City {}
 
 impl Default for City {

@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy::time::Stopwatch;
 
 use crate::{
-    building, empire, resource,
+    actions, building, controls, empire, resource,
     tile::{self, TILE_SIZE},
     unit, utils, world_gen,
 };
@@ -48,6 +48,26 @@ fn tick_units(
         let tile_entity = world_state.tiles.get(&unit.location).unwrap();
         let tile = tiles.get(*tile_entity).unwrap();
         transform.translation.z = tile.height + TILE_SIZE / 1.;
+    }
+}
+
+pub fn execute_actions(
+    mut action_reader: EventReader<ActionEvent>,
+    mut commands: Commands,
+    mut selector_state: ResMut<controls::SelectorState>,
+    mut tile_query: Query<&mut tile::Tile>,
+    building_resources: Res<building::BuildingResources>,
+    unit_resources: Res<unit::UnitResources>,
+) {
+    for action_event in action_reader.read() {
+        (tile_query, selector_state, commands) = actions::execute(
+            action_event.action.clone(),
+            tile_query,
+            selector_state,
+            commands,
+            &building_resources,
+            &unit_resources,
+        );
     }
 }
 
@@ -103,4 +123,9 @@ fn add_item<'a>(
     let current_amount = empire.inventory.inv.get(&item).unwrap_or(&0).clone();
     empire.inventory.inv.insert(item, current_amount + amount);
     return empire;
+}
+
+#[derive(Event)]
+pub struct ActionEvent {
+    pub action: actions::Action,
 }

@@ -1,23 +1,35 @@
 use bevy::prelude::*;
 
-use crate::{building, controls, tile};
+use crate::{building, controls, tile, unit, utils};
+
+#[derive(Clone, Component, Debug)]
 pub enum Action {
     Build(Build),
     KillUnit(Entity),
+    Spawn(Spawn),
+    Noop,
 }
 
+#[derive(Clone, Debug)]
+pub struct Spawn {
+    pub location: utils::Coordinates,
+    pub unit: unit::Unit,
+}
+
+#[derive(Clone, Debug)]
 pub struct Build {
     pub building: building::Building,
     pub tile_entity: Entity,
     pub owner: i32,
 }
 
-pub fn execute<'a, 'b, 'c, 'd, 'e, 'f, 'g>(
+pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
     action: Action,
     mut tile_query: Query<'a, 'b, &'c mut tile::Tile>,
     mut selector_state: ResMut<'d, controls::SelectorState>,
-    building_resources: &Res<'e, building::BuildingResources>,
     mut commands: Commands<'f, 'g>,
+    building_resources: &Res<building::BuildingResources>,
+    unit_resources: &Res<unit::UnitResources>,
 ) -> (
     Query<'a, 'b, &'c mut tile::Tile>,
     ResMut<'d, controls::SelectorState>,
@@ -41,6 +53,12 @@ pub fn execute<'a, 'b, 'c, 'd, 'e, 'f, 'g>(
             selector_state.selected_unit = None;
 
             commands.entity(unit_entity).despawn();
+        }
+        Action::Spawn(spawn) => {
+            let unit_bundle = unit::make_bundle(spawn.unit, &unit_resources);
+        }
+        Action::Noop => {
+            println!("Noop")
         }
     }
 

@@ -6,7 +6,7 @@ use crate::{resource, tile::TILE_SIZE};
 pub mod capital;
 pub mod city;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Building {
     Capital(capital::Capital),
     City(city::City),

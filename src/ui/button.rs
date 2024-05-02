@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::actions;
+
 const BUTTON_BORDER: Color = Color::hsl(0.0, 0.0, 0.5);
 const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
@@ -30,22 +32,25 @@ pub fn button_system(
     }
 }
 
-pub fn make_button() -> ButtonBundle {
-    ButtonBundle {
-        style: Style {
-            height: Val::Px(30.0),
-            border: UiRect::all(Val::Px(1.0)),
-            margin: UiRect::all(Val::Px(20.0)),
-            // horizontally center child text
-            justify_content: JustifyContent::Center,
-            // vertically center child text
-            align_items: AlignItems::Center,
+pub fn make_button(action: &actions::Action) -> (ButtonBundle, actions::Action) {
+    (
+        ButtonBundle {
+            style: Style {
+                height: Val::Px(30.0),
+                border: UiRect::all(Val::Px(1.0)),
+                margin: UiRect::all(Val::Px(20.0)),
+                // horizontally center child text
+                justify_content: JustifyContent::Center,
+                // vertically center child text
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            border_color: BorderColor(BUTTON_BORDER),
+            background_color: NORMAL_BUTTON.into(),
             ..default()
         },
-        border_color: BorderColor(BUTTON_BORDER),
-        background_color: NORMAL_BUTTON.into(),
-        ..default()
-    }
+        action.clone(),
+    )
 }
 
 pub fn make_button_text(text: String) -> TextBundle {

@@ -55,6 +55,7 @@ fn main() {
                 ui::fps::fps_text_update_system,
                 ui::fps::fps_counter_showhide,
             ),
+            tick::execute_actions,
             tick::tick_world,
         ))
             .chain(),
@@ -63,6 +64,7 @@ fn main() {
     app.add_event::<controls::InspectTileEvent>();
     app.add_event::<controls::SelectUnit>();
     app.add_event::<controls::DragEvent>();
+    app.add_event::<tick::ActionEvent>();
 
     app.run();
 }

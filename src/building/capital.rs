@@ -4,7 +4,7 @@ use crate::{resource, tile};
 
 use super::BuildingTrait;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Capital {
     level: i32,
 }

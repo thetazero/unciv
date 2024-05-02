@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use super::UnitTrait;
 use crate::{actions, building, tile};
 
+#[derive(Clone, Debug)]
 pub struct Settler {}
 
 impl Default for Settler {
