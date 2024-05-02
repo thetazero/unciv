@@ -44,6 +44,8 @@ fn main() {
         ((
             controls::handle_keyboard,
             controls::update_selection,
+            controls::handle_drag,
+            controls::handle_mouse_scroll,
             (
                 ui::panels::update_tile_inspector,
                 ui::panels::update_empire_panel,
@@ -60,6 +62,7 @@ fn main() {
 
     app.add_event::<controls::InspectTileEvent>();
     app.add_event::<controls::SelectUnit>();
+    app.add_event::<controls::DragEvent>();
 
     app.run();
 }
@@ -91,7 +94,7 @@ fn setup(
         transform: Transform::from_xyz(4.0, 8.0, 4.0).looking_at(Vec3::new(0.1, 0.1, 0.), Vec3::Y),
         directional_light: DirectionalLight {
             color: Color::WHITE,
-            shadows_enabled: true,
+            shadows_enabled: false,
             ..default()
         },
         ..default()

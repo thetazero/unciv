@@ -10,6 +10,8 @@ pub struct KeyBinds {
 pub struct CameraConfig {
     pub pan_speed: f32,
     pub zoom_speed: f32,
+    pub mouse_drag_pan_speed: f32,
+    pub mouse_wheel_zoom_speed: f32,
     pub max_z: f32,
     pub min_z: f32,
 }
@@ -24,6 +26,8 @@ pub const fn default_config() -> Config {
     Config {
         camera: CameraConfig {
             pan_speed: 1.0,
+            mouse_drag_pan_speed: 0.2,
+            mouse_wheel_zoom_speed: 3.0,
             zoom_speed: 0.7,
             max_z: 60.,
             min_z: 8.,

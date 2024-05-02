@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{input::mouse::MouseWheel, prelude::*};
 use bevy_mod_picking::prelude::*;
 
 use crate::{actions, building, config::CONFIG, tile, unit, world_gen};
@@ -228,5 +228,46 @@ pub struct SelectUnit {
 impl From<ListenerInput<Pointer<Click>>> for SelectUnit {
     fn from(event: ListenerInput<Pointer<Click>>) -> Self {
         SelectUnit { unit: event.target }
+    }
+}
+
+#[derive(Event)]
+pub struct DragEvent {
+    pub dx: f32,
+    pub dy: f32,
+}
+impl From<ListenerInput<Pointer<Drag>>> for DragEvent {
+    fn from(event: ListenerInput<Pointer<Drag>>) -> Self {
+        DragEvent {
+            dx: event.delta.x,
+            dy: event.delta.y,
+        }
+    }
+}
+
+pub fn handle_drag(
+    mut drag_events: EventReader<DragEvent>,
+    mut camera: Query<&mut Transform, With<Camera3d>>,
+    time: Res<Time>,
+) {
+    for ev in drag_events.read() {
+        for mut transform in camera.iter_mut() {
+            transform.translation.x -= ev.dx * time.delta_seconds() * transform.translation.z * CONFIG.camera.mouse_drag_pan_speed;
+            transform.translation.y += ev.dy * time.delta_seconds() * transform.translation.z * CONFIG.camera.mouse_drag_pan_speed;
+        }
+    }
+}
+
+pub fn handle_mouse_scroll(
+    mut scroll_events: EventReader<MouseWheel>,
+    mut camera: Query<&mut Transform, With<Camera3d>>,
+    time: Res<Time>,
+) {
+    for ev in scroll_events.read() {
+        for mut transform in camera.iter_mut() {
+            let mut z = transform.translation.z * (1. - ev.y * CONFIG.camera.mouse_wheel_zoom_speed * time.delta_seconds());
+            z = z.clamp(CONFIG.camera.min_z, CONFIG.camera.max_z);
+            transform.translation.z = z;
+        }
     }
 }

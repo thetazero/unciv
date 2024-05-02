@@ -134,7 +134,7 @@ pub fn make_bundle(
     Tile,
     MaterialMeshBundle<StandardMaterial>,
     PickableBundle,
-    // On<Pointer<Drag>>,
+    On<Pointer<Drag>>,
     On<Pointer<Click>>,
 ) {
     let material = match tile.owner {
@@ -160,10 +160,7 @@ pub fn make_bundle(
             ..default()
         },
         PickableBundle::default(),
-        // On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
-        //     transform.translation.x += drag.delta.x; // Make the square follow the mouse
-        //     transform.translation.y -= drag.delta.y;
-        // }),
+        On::<Pointer<Drag>>::send_event::<controls::DragEvent>(),
         On::<Pointer<Click>>::send_event::<controls::InspectTileEvent>(),
     )
 }
