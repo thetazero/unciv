@@ -58,33 +58,34 @@ pub fn init(mut commands: Commands) {
                             ));
                         });
 
-                    parent
-                        .spawn(NodeBundle {
-                            style: Style {
-                                margin: UiRect::all(Val::Px(10.)),
-                                display: Display::Grid,
-                                ..default()
-                            },
-                            background_color: Color::rgb(0.15, 0.15, 0.15).into(),
-                            ..default()
-                        })
-                        .with_children(|parent| {
-                            init_entity_spawner_tab(parent);
-                        });
+                    init_entity_spawner_tab(parent);
                 });
         });
 }
 
 fn init_entity_spawner_tab(parent: &mut ChildBuilder) {
-    parent.spawn(button::make_button()).with_children(|parent| {
-        parent.spawn(button::make_button_text("Settler".to_string()));
-    });
-    // parent.spawn(button::make_button()).with_children(|parent| {
-    //     parent.spawn(button::make_button_text("End Turn".to_string()));
-    // });
-    // parent.spawn(button::make_button()).with_children(|parent| {
-    //     parent.spawn(button::make_button_text("End Turn".to_string()));
-    // });
+    parent
+        .spawn(NodeBundle {
+            style: Style {
+                margin: UiRect::all(Val::Px(10.)),
+                display: Display::Grid,
+                grid_template_rows: RepeatedGridTrack::flex(10, 1.0),
+                ..default()
+            },
+            background_color: Color::rgb(0.15, 0.15, 0.15).into(),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent.spawn(button::make_button()).with_children(|parent| {
+                parent.spawn(button::make_button_text("Settler".to_string()));
+            });
+            parent.spawn(button::make_button()).with_children(|parent| {
+                parent.spawn(button::make_button_text("Stupid".to_string()));
+            });
+            parent.spawn(button::make_button()).with_children(|parent| {
+                parent.spawn(button::make_button_text("End Turn".to_string()));
+            });
+        });
     // parent.spawn(button::make_button()).with_children(|parent| {
     //     parent.spawn(button::make_button_text("End Turn".to_string()));
     // });
