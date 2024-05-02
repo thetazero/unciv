@@ -1,10 +1,7 @@
-use bevy::{
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-};
+use bevy::prelude::*;
 use bevy_mod_picking::PickableBundle;
 
-use crate::resource;
+use crate::{resource, tile::TILE_SIZE};
 
 pub mod capital;
 pub mod city;
@@ -19,25 +16,26 @@ trait BuildingTrait {
     fn production(&self) -> Vec<(resource::Resource, i32)>;
     fn name(&self) -> String;
     fn get_mesh(&self, building_resources: &Res<BuildingResources>) -> Handle<Mesh>;
-    fn get_material(&self, building_resources: &Res<BuildingResources>) -> Handle<ColorMaterial>;
+    fn get_material(&self, building_resources: &Res<BuildingResources>)
+        -> Handle<StandardMaterial>;
     fn load_mesh() -> Mesh;
-    fn load_material() -> ColorMaterial;
+    fn load_material() -> StandardMaterial;
 }
 
 #[derive(Resource)]
 pub struct BuildingResources {
     capital_mesh: Handle<Mesh>,
-    capital_material: Handle<ColorMaterial>,
+    capital_material: Handle<StandardMaterial>,
     city_mesh: Handle<Mesh>,
-    city_material: Handle<ColorMaterial>,
+    city_material: Handle<StandardMaterial>,
 }
 
 pub fn create_building_resources<'a, 'b>(
-    mut materials: ResMut<'a, Assets<ColorMaterial>>,
+    mut materials: ResMut<'a, Assets<StandardMaterial>>,
     mut meshes: ResMut<'b, Assets<Mesh>>,
 ) -> (
     BuildingResources,
-    ResMut<'a, Assets<ColorMaterial>>,
+    ResMut<'a, Assets<StandardMaterial>>,
     ResMut<'b, Assets<Mesh>>,
 ) {
     let capital_mesh = meshes.add(capital::Capital::load_mesh());
@@ -82,7 +80,7 @@ pub fn building_mesh(
 pub fn building_material(
     building: &Building,
     building_resources: &Res<BuildingResources>,
-) -> Handle<ColorMaterial> {
+) -> Handle<StandardMaterial> {
     match building {
         Building::Capital(capital) => capital.get_material(building_resources),
         Building::City(city) => city.get_material(building_resources),
@@ -92,12 +90,12 @@ pub fn building_material(
 pub fn make_bundle(
     building: &Building,
     building_resources: &Res<BuildingResources>,
-) -> (MaterialMesh2dBundle<ColorMaterial>, PickableBundle) {
-    let transform = Transform::from_xyz(0., 0., 2.);
+) -> (MaterialMeshBundle<StandardMaterial>, PickableBundle) {
+    let transform = Transform::from_xyz(0., 0., TILE_SIZE as f32 / 1.);
 
     (
-        MaterialMesh2dBundle {
-            mesh: Mesh2dHandle(building_mesh(building, building_resources)),
+        MaterialMeshBundle {
+            mesh: building_mesh(building, building_resources),
             material: building_material(building, building_resources),
             transform,
             ..default()

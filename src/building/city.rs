@@ -27,7 +27,7 @@ impl BuildingTrait for City {
     fn get_material(
         &self,
         building_resources: &Res<super::BuildingResources>,
-    ) -> Handle<ColorMaterial> {
+    ) -> Handle<StandardMaterial> {
         building_resources.city_material.clone()
     }
 
@@ -35,14 +35,16 @@ impl BuildingTrait for City {
         building_resources.city_mesh.clone()
     }
 
-    fn load_material() -> ColorMaterial {
-        ColorMaterial {
-            color: Color::hsl(30.0, 0.3, 0.5),
-            texture: None,
-        }
+    fn load_material() -> StandardMaterial {
+        Color::hsl(30.0, 0.3, 0.5).into()
     }
 
     fn load_mesh() -> Mesh {
-        Rectangle::new(tile::TILE_SIZE as f32 / 1.5, tile::TILE_SIZE as f32 / 1.5).into()
+        Cuboid::new(
+            tile::TILE_SIZE as f32 / 1.5,
+            tile::TILE_SIZE as f32 / 1.5,
+            tile::TILE_SIZE as f32 / 1.5,
+        )
+        .into()
     }
 }

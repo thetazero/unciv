@@ -1,8 +1,4 @@
-use bevy::{
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-    utils::HashMap,
-};
+use bevy::{prelude::*, utils::HashMap};
 
 use bevy_mod_picking::prelude::*;
 
@@ -17,7 +13,7 @@ pub enum TileKind {
     Water,
 }
 
-pub fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<ColorMaterial> {
+pub fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<StandardMaterial> {
     match kind {
         TileKind::Desert => tile_resources.materials.desert.clone(),
         TileKind::Forest => tile_resources.materials.forest.clone(),
@@ -46,39 +42,39 @@ pub struct Tile {
 }
 
 struct TileMaterials {
-    pub desert: Handle<ColorMaterial>,
-    pub forest: Handle<ColorMaterial>,
-    pub mountain: Handle<ColorMaterial>,
-    pub snowy_mountain: Handle<ColorMaterial>,
-    pub water: Handle<ColorMaterial>,
-    pub empire_colors: HashMap<i32, Handle<ColorMaterial>>,
+    pub desert: Handle<StandardMaterial>,
+    pub forest: Handle<StandardMaterial>,
+    pub mountain: Handle<StandardMaterial>,
+    pub snowy_mountain: Handle<StandardMaterial>,
+    pub water: Handle<StandardMaterial>,
+    pub empire_colors: HashMap<i32, Handle<StandardMaterial>>,
 }
 
 #[derive(Resource)]
 pub struct TileResources {
     materials: TileMaterials,
-    pub empire_red: Handle<ColorMaterial>,
+    pub empire_red: Handle<StandardMaterial>,
     pub square: Handle<Mesh>,
 }
 
 pub const TILE_SIZE: f32 = 50.;
 
 pub fn create_tile_resources<'a, 'b>(
-    mut materials: ResMut<'a, Assets<ColorMaterial>>,
+    mut materials: ResMut<'a, Assets<StandardMaterial>>,
     mut meshes: ResMut<'b, Assets<Mesh>>,
 ) -> (
     TileResources,
-    ResMut<'a, Assets<ColorMaterial>>,
+    ResMut<'a, Assets<StandardMaterial>>,
     ResMut<'b, Assets<Mesh>>,
 ) {
     let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
     let desert = materials.add(Color::hsl(47., 0.29, 0.49));
-    let forest: Handle<ColorMaterial> = materials.add(dark_hue(0.4));
+    let forest = materials.add(dark_hue(0.4));
     let mountain = materials.add(Color::hsl(0.3, 0.1, 0.3));
     let snowy_mountain = materials.add(Color::hsl(0.3, 0.05, 0.8));
     let water = materials.add(Color::hsl(200.0, 0.3, 0.5));
 
-    let square: Handle<Mesh> = meshes.add(Rectangle::new(TILE_SIZE, TILE_SIZE));
+    let square: Handle<Mesh> = meshes.add(Cuboid::new(TILE_SIZE, TILE_SIZE, TILE_SIZE));
 
     let mut empire_colors = HashMap::default();
 
@@ -116,7 +112,7 @@ pub fn make_bundle(
     tile: &Tile,
 ) -> (
     Tile,
-    MaterialMesh2dBundle<ColorMaterial>,
+    MaterialMeshBundle<StandardMaterial>,
     PickableBundle,
     // On<Pointer<Drag>>,
     On<Pointer<Click>>,
@@ -135,8 +131,8 @@ pub fn make_bundle(
 
     (
         tile.clone(),
-        MaterialMesh2dBundle {
-            mesh: Mesh2dHandle(tile_resources.square.clone()),
+        MaterialMeshBundle {
+            mesh: tile_resources.square.clone(),
             material,
             transform: tile_location,
             ..default()

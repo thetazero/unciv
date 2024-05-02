@@ -84,7 +84,7 @@ pub fn spawn(
     tile_resources: Res<tile::TileResources>,
     building_resources: Res<building::BuildingResources>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    camera: Query<&mut Transform, With<Camera2d>>,
+    camera: Query<&mut Transform, With<Camera3d>>,
     unit_resources: Res<unit::UnitResources>,
 ) {
     let mut world_state = WorldState {

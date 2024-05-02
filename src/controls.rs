@@ -31,7 +31,7 @@ pub fn init_state(mut commands: Commands, world_state: ResMut<world_gen::WorldSt
 
 pub fn handle_keyboard(
     mut commands: Commands,
-    mut camera: Query<&mut Transform, With<Camera2d>>,
+    mut camera: Query<&mut Transform, With<Camera3d>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut app_exit_events: ResMut<Events<bevy::app::AppExit>>,
     time: Res<Time>,
@@ -69,15 +69,12 @@ pub fn handle_keyboard(
     }
 
     for mut transform in camera.iter_mut() {
-        transform.scale *= 1. + delta_scale * time.delta_seconds();
-        transform.scale = transform
-            .scale
-            .clamp(CONFIG.camera.min_zoom, CONFIG.camera.max_zoom);
+        let mut z = transform.translation.z * (1. + delta_scale * time.delta_seconds());
+        z = z.clamp(CONFIG.camera.min_z, CONFIG.camera.max_z);
+        transform.translation.z = z;
 
-        let scale_magnitude = transform.scale.length();
-
-        transform.translation.x += delta_x * time.delta_seconds() * scale_magnitude;
-        transform.translation.y += delta_y * time.delta_seconds() * scale_magnitude;
+        transform.translation.x += delta_x * time.delta_seconds() * z;
+        transform.translation.y += delta_y * time.delta_seconds() * z;
     }
 
     if keyboard_input.just_pressed(CONFIG.keys.action) {
@@ -103,10 +100,10 @@ pub fn handle_keyboard(
     }
 }
 
-pub fn move_camera_to(mut camera: Query<&mut Transform, With<Camera2d>>, target: Transform) {
+pub fn move_camera_to(mut camera: Query<&mut Transform, With<Camera3d>>, target: Transform) {
     for mut transform in camera.iter_mut() {
-        transform.translation.x = target.translation.x;
-        transform.translation.y = target.translation.y;
+        transform.translation = target.translation;
+        transform.translation.z = 1000.;
     }
 }
 

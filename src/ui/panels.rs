@@ -86,9 +86,6 @@ fn init_entity_spawner_tab(parent: &mut ChildBuilder) {
                 parent.spawn(button::make_button_text("End Turn".to_string()));
             });
         });
-    // parent.spawn(button::make_button()).with_children(|parent| {
-    //     parent.spawn(button::make_button_text("End Turn".to_string()));
-    // });
 }
 
 #[derive(Component)]

@@ -1,5 +1,4 @@
 use bevy::input::keyboard::KeyCode;
-use bevy::math::Vec3;
 
 pub struct KeyBinds {
     pub quit: KeyCode,
@@ -11,8 +10,8 @@ pub struct KeyBinds {
 pub struct CameraConfig {
     pub pan_speed: f32,
     pub zoom_speed: f32,
-    pub max_zoom: Vec3,
-    pub min_zoom: Vec3,
+    pub max_z: f32,
+    pub min_z: f32,
 }
 
 pub struct Config {
@@ -24,10 +23,10 @@ pub struct Config {
 pub const fn default_config() -> Config {
     Config {
         camera: CameraConfig {
-            pan_speed: 300.0,
-            zoom_speed: 1.4,
-            max_zoom: Vec3::new(7.0, 7.0, 7.0),
-            min_zoom: Vec3::new(0.4, 0.4, 0.4),
+            pan_speed: 1.0,
+            zoom_speed: 0.7,
+            max_z: 3000.,
+            min_z: 400.,
         },
         world_size: (100, 100),
         keys: KeyBinds {

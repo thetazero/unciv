@@ -30,7 +30,7 @@ impl BuildingTrait for Capital {
     fn get_material(
         &self,
         building_resources: &Res<super::BuildingResources>,
-    ) -> Handle<ColorMaterial> {
+    ) -> Handle<StandardMaterial> {
         building_resources.capital_material.clone()
     }
 
@@ -42,13 +42,15 @@ impl BuildingTrait for Capital {
     }
 
     fn load_mesh() -> Mesh {
-        Rectangle::new(tile::TILE_SIZE as f32 / 1.5, tile::TILE_SIZE as f32 / 1.5).into()
+        Cuboid::new(
+            tile::TILE_SIZE as f32 / 1.5,
+            tile::TILE_SIZE as f32 / 1.5,
+            tile::TILE_SIZE as f32 / 1.5,
+        )
+        .into()
     }
 
-    fn load_material() -> ColorMaterial {
-        ColorMaterial {
-            color: Color::hsl(0.0, 0.0, 0.5),
-            texture: None,
-        }
+    fn load_material() -> StandardMaterial {
+        Color::hsl(0.0, 0.0, 0.5).into()
     }
 }

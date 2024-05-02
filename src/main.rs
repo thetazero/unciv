@@ -66,7 +66,7 @@ fn main() {
 
 fn add_resources(
     mut commands: Commands,
-    materials: ResMut<Assets<ColorMaterial>>,
+    materials: ResMut<Assets<StandardMaterial>>,
     meshes: ResMut<Assets<Mesh>>,
 ) {
     let (tile_resources, materials, meshes) = tile::create_tile_resources(materials, meshes);
@@ -85,7 +85,16 @@ fn setup(
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera3dBundle::default());
+
+    commands.spawn(DirectionalLightBundle {
+        transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        directional_light: DirectionalLight {
+            color: Color::WHITE,
+            ..default()
+        },
+        ..default()
+    });
 
     let _background_plane: Handle<Mesh> = meshes.add(Rectangle::new(10000.0, 10000.0));
     let _ocean_dark: Handle<ColorMaterial> = materials.add(Color::hsl(200.0, 0.3, 0.07));

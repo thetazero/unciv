@@ -1,10 +1,11 @@
-use bevy::{
-    prelude::*,
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-};
+use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::{actions, controls, tile, utils};
+use crate::{
+    actions, controls,
+    tile::{self, TILE_SIZE},
+    utils,
+};
 
 pub mod settler;
 
@@ -37,11 +38,11 @@ pub struct UnitResources {
 }
 
 pub fn create_resources<'a, 'b>(
-    materials: ResMut<'a, Assets<ColorMaterial>>,
+    materials: ResMut<'a, Assets<StandardMaterial>>,
     meshes: ResMut<'b, Assets<Mesh>>,
 ) -> (
     UnitResources,
-    ResMut<'a, Assets<ColorMaterial>>,
+    ResMut<'a, Assets<StandardMaterial>>,
     ResMut<'b, Assets<Mesh>>,
 ) {
     let (settler, materials, meshes) = settler::init_resources(materials, meshes);
@@ -57,10 +58,10 @@ pub fn spawn<'a, 'b>(
     let (x, y) = utils::to_world_location(&unit.location);
 
     commands.spawn((
-        MaterialMesh2dBundle {
-            mesh: Mesh2dHandle(unit_resources.settler.mesh.clone()),
+        MaterialMeshBundle {
+            mesh: unit_resources.settler.mesh.clone(),
             material: unit_resources.settler.color.clone(),
-            transform: Transform::from_xyz(x, y, 10.),
+            transform: Transform::from_xyz(x, y, TILE_SIZE as f32 * 2.),
             ..default()
         },
         unit,
@@ -71,8 +72,11 @@ pub fn spawn<'a, 'b>(
 }
 
 trait UnitTrait {
-    fn get_normal_material(&self, unit_resources: &Res<UnitResources>) -> Handle<ColorMaterial>;
-    fn get_selected_material(&self, unit_resources: &Res<UnitResources>) -> Handle<ColorMaterial>;
+    fn get_normal_material(&self, unit_resources: &Res<UnitResources>) -> Handle<StandardMaterial>;
+    fn get_selected_material(
+        &self,
+        unit_resources: &Res<UnitResources>,
+    ) -> Handle<StandardMaterial>;
     fn tile_action(
         &self,
         tile: Mut<tile::Tile>,
@@ -85,7 +89,7 @@ trait UnitTrait {
 pub fn get_selected_material(
     unit: &Unit,
     unit_resources: &Res<UnitResources>,
-) -> Handle<ColorMaterial> {
+) -> Handle<StandardMaterial> {
     match &unit.kind {
         UnitKind::Settler(settler) => settler.get_selected_material(unit_resources),
     }
@@ -94,7 +98,7 @@ pub fn get_selected_material(
 pub fn get_normal_material(
     unit: &Unit,
     unit_resources: &Res<UnitResources>,
-) -> Handle<ColorMaterial> {
+) -> Handle<StandardMaterial> {
     match &unit.kind {
         UnitKind::Settler(settler) => settler.get_normal_material(unit_resources),
     }
