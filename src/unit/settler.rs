@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use super::UnitTrait;
+use crate::{actions, building, tile};
 
 pub struct Settler {}
 
@@ -48,7 +49,38 @@ impl UnitTrait for Settler {
         return unit_resources.settler.color.clone();
     }
 
-    fn get_selected_material(&self, unit_resources: &Res<super::UnitResources>) -> Handle<ColorMaterial> {
+    fn get_selected_material(
+        &self,
+        unit_resources: &Res<super::UnitResources>,
+    ) -> Handle<ColorMaterial> {
         return unit_resources.settler.selected_color.clone();
+    }
+
+    fn tile_action(
+        &self,
+        tile: Mut<tile::Tile>,
+        unit_entity: Entity,
+        tile_entity: Entity,
+        acting_empire: i32,
+    ) -> Vec<actions::Action> {
+        match &tile.building {
+            None => {
+                let capital = building::Building::City(building::city::City::default());
+
+                vec![
+                    actions::Action::Build(actions::Build {
+                        building: capital,
+                        tile_entity: tile_entity,
+                        owner: acting_empire,
+                    }),
+                    actions::Action::KillUnit(unit_entity),
+                ]
+            }
+            Some(_) => {
+                println!("Can't build over a building");
+
+                vec![]
+            }
+        }
     }
 }

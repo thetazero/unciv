@@ -4,7 +4,7 @@ use bevy::{
 };
 use bevy_mod_picking::prelude::*;
 
-use crate::{controls, utils};
+use crate::{actions, controls, tile, utils};
 
 pub mod settler;
 
@@ -73,6 +73,13 @@ pub fn spawn<'a, 'b>(
 trait UnitTrait {
     fn get_normal_material(&self, unit_resources: &Res<UnitResources>) -> Handle<ColorMaterial>;
     fn get_selected_material(&self, unit_resources: &Res<UnitResources>) -> Handle<ColorMaterial>;
+    fn tile_action(
+        &self,
+        tile: Mut<tile::Tile>,
+        unit_entity: Entity,
+        tile_entity: Entity,
+        acting_empire: i32,
+    ) -> Vec<actions::Action>;
 }
 
 pub fn get_selected_material(
@@ -90,5 +97,19 @@ pub fn get_normal_material(
 ) -> Handle<ColorMaterial> {
     match &unit.kind {
         UnitKind::Settler(settler) => settler.get_normal_material(unit_resources),
+    }
+}
+
+pub fn tile_action(
+    unit: &Unit,
+    tile: Mut<tile::Tile>,
+    unit_entity: Entity,
+    tile_entity: Entity,
+    acting_empire: i32,
+) -> Vec<actions::Action> {
+    match &unit.kind {
+        UnitKind::Settler(settler) => {
+            settler.tile_action(tile, unit_entity, tile_entity, acting_empire)
+        }
     }
 }

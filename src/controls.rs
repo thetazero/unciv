@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
-use crate::{building, config::CONFIG, tile, unit, world_gen};
+use crate::{actions, building, config::CONFIG, tile, unit, world_gen};
 
 #[derive(Resource)]
 pub struct SelectorState {
@@ -85,32 +85,19 @@ pub fn handle_keyboard(
         if let Some(unit_entity) = selector_state.selected_unit {
             let unit = unit_query.get(unit_entity).unwrap();
 
-            match unit.kind {
-                unit::UnitKind::Settler(_) => {
-                    let tile_entity = world_state.tiles.get(&unit.location).unwrap();
-                    let mut tile = tile_query.get_mut(*tile_entity).unwrap();
+            let tile_entity = world_state.tiles.get(&unit.location).unwrap();
+            let tile = tile_query.get_mut(*tile_entity).unwrap();
 
-                    match &tile.building {
-                        Some(_) => {
-                            println!("Can't settle over a building");
-                        }
-                        None => {
-                            tile.owner = Some(0);
-                            let building =
-                                building::Building::City(building::city::City::default());
-                            tile.building = Some(building.clone());
+            let actions = unit::tile_action(unit, tile, unit_entity, *tile_entity, 0);
 
-                            selector_state.selected_unit = None;
-
-                            commands.entity(unit_entity).despawn();
-
-                            let building_bundle =
-                                building::make_bundle(&building, &building_resources);
-                            let building_id = commands.spawn(building_bundle).id();
-                            commands.entity(*tile_entity).push_children(&[building_id]);
-                        }
-                    }
-                }
+            for action in actions {
+                (tile_query, selector_state, commands) = actions::execute(
+                    action,
+                    tile_query,
+                    selector_state,
+                    &building_resources,
+                    commands,
+                );
             }
         }
     }

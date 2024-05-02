@@ -2,6 +2,7 @@ use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
+mod actions;
 mod building;
 mod colors;
 mod config;
