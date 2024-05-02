@@ -10,7 +10,9 @@ pub enum TileKind {
     Forest,
     Mountain,
     SnowyMountain,
-    Water,
+    Shallows,
+    Ocean,
+    Beach,
 }
 
 pub fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<StandardMaterial> {
@@ -19,7 +21,9 @@ pub fn tile_material(kind: &TileKind, tile_resources: &TileResources) -> Handle<
         TileKind::Forest => tile_resources.materials.forest.clone(),
         TileKind::Mountain => tile_resources.materials.mountain.clone(),
         TileKind::SnowyMountain => tile_resources.materials.snowy_mountain.clone(),
-        TileKind::Water => tile_resources.materials.water.clone(),
+        TileKind::Shallows => tile_resources.materials.water.clone(),
+        TileKind::Ocean => tile_resources.materials.ocean.clone(),
+        TileKind::Beach => tile_resources.materials.beach.clone(),
     }
 }
 
@@ -29,7 +33,9 @@ pub fn tile_string(kind: &TileKind) -> String {
         TileKind::Forest => "Forest".to_string(),
         TileKind::Mountain => "Mountain".to_string(),
         TileKind::SnowyMountain => "Snowy Mountain".to_string(),
-        TileKind::Water => "Water".to_string(),
+        TileKind::Shallows => "Water".to_string(),
+        TileKind::Ocean => "Ocean".to_string(),
+        TileKind::Beach => "Beach".to_string(),
     }
 }
 
@@ -48,6 +54,8 @@ struct TileMaterials {
     pub mountain: Handle<StandardMaterial>,
     pub snowy_mountain: Handle<StandardMaterial>,
     pub water: Handle<StandardMaterial>,
+    pub ocean: Handle<StandardMaterial>,
+    pub beach: Handle<StandardMaterial>,
     pub empire_colors: HashMap<i32, Handle<StandardMaterial>>,
 }
 
@@ -69,11 +77,13 @@ pub fn create_tile_resources<'a, 'b>(
     ResMut<'b, Assets<Mesh>>,
 ) {
     let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
-    let desert = materials.add(Color::hsl(47., 0.29, 0.49));
+    let desert = materials.add(Color::hsl(47., 0.39, 0.39));
     let forest = materials.add(dark_hue(0.4));
     let mountain = materials.add(Color::hsl(0.3, 0.1, 0.3));
     let snowy_mountain = materials.add(Color::hsl(0.3, 0.05, 0.8));
     let water = materials.add(Color::hsl(200.0, 0.3, 0.5));
+    let ocean = materials.add(Color::hsl(200.0, 0.4, 0.3));
+    let beach = materials.add(Color::hsl(47., 0.29, 0.49));
 
     let square: Handle<Mesh> = meshes.add(Cuboid::new(TILE_SIZE, TILE_SIZE, TILE_SIZE));
 
@@ -92,6 +102,8 @@ pub fn create_tile_resources<'a, 'b>(
                 snowy_mountain,
                 water,
                 empire_colors,
+                ocean,
+                beach,
             },
             empire_red,
             square,
@@ -105,6 +117,13 @@ pub fn is_spawnable(kind: &TileKind) -> bool {
     match kind {
         TileKind::Forest | TileKind::Mountain => true,
         _ => false,
+    }
+}
+
+pub fn is_land(kind: &TileKind) -> bool {
+    match kind {
+        TileKind::Ocean | TileKind::Shallows => false,
+        _ => true,
     }
 }
 

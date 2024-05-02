@@ -8,8 +8,10 @@ use crate::tile::TILE_SIZE;
 use crate::{building, colors, controls, empire, tile, unit, utils};
 
 fn compute_tile_kind(height: f64, biome: f64) -> tile::TileKind {
-    if height < -0.1 {
-        return tile::TileKind::Water;
+    if height < -0.3 {
+        return tile::TileKind::Ocean;
+    } else if height < -0.1 {
+        return tile::TileKind::Shallows;
     } else if height < 0.5 {
         if biome < 0. {
             return tile::TileKind::Desert;
@@ -30,7 +32,7 @@ fn scaled_simplex_2d(simplex: Simplex, x: f64, y: f64, scale: f64) -> f64 {
 pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
     let simplex_2d = Simplex::new(2);
 
-    let mut tiles = Vec::new();
+    let mut tiles = HashMap::new();
     for x in 0..x_count {
         for y in 0..y_count {
             let x_float = x as f64;
@@ -40,16 +42,46 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
             let biome = scaled_simplex_2d(simplex_2d, x_float, y_float, 0.02);
 
             let kind: tile::TileKind = compute_tile_kind(height, biome);
-            tiles.push(tile::Tile {
+
+            let tile = tile::Tile {
                 location: utils::Coordinates { x, y },
                 height: (height as f32 * TILE_SIZE * 2.).max(0.),
                 kind: kind.clone(),
                 owner: None,
                 building: None,
-            });
+            };
+
+            tiles.insert(tile.location, tile);
         }
     }
-    tiles
+
+    let keys = tiles.keys().cloned().collect::<Vec<utils::Coordinates>>();
+
+    for loc in keys.iter() {
+        let tile = tiles.get(loc).unwrap();
+
+        if tile::is_land(&tile.kind) {
+            for (x, y) in utils::DIRECTIONS.iter() {
+                if *x == 0 && *y == 0 {
+                    continue;
+                }
+
+                let neighbor_loc = utils::Coordinates {
+                    x: loc.x + x,
+                    y: loc.y + y,
+                };
+
+                if let Some(neighbor) = tiles.get(&neighbor_loc) {
+                    if !tile::is_land(&neighbor.kind) {
+                        let tile_mut = tiles.get_mut(&loc).unwrap();
+                        tile_mut.kind = tile::TileKind::Beach;
+                    }
+                }
+            }
+        }
+    }
+
+    tiles.into_iter().map(|(_, tile)| tile).collect()
 }
 
 fn add_empire_data(tile_data: &mut Vec<tile::Tile>, number_of_empires: i32) {

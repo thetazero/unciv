@@ -45,3 +45,14 @@ pub fn to_transform(coordinates: &Coordinates) -> Transform {
 
     Transform::from_translation(Vec3::new(x, y, 0.))
 }
+
+pub const DIRECTIONS: [(i32, i32); 8] = [
+    (1, 0),
+    (1, 1),
+    (0, 1),
+    (-1, 1),
+    (-1, 0),
+    (-1, -1),
+    (0, -1),
+    (1, -1),
+];
