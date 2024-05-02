@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::actions;
+use crate::{actions, tick};
 
 const BUTTON_BORDER: Color = Color::hsl(0.0, 0.0, 0.5);
 const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
@@ -9,16 +9,24 @@ const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 
 pub fn button_system(
     mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &mut BorderColor),
+        (Entity, &Interaction, &mut BackgroundColor, &mut BorderColor),
         (Changed<Interaction>, With<Button>),
     >,
+    actions_query: Query<&actions::Action>,
+    mut actions_writer: EventWriter<tick::ActionEvent>,
 ) {
-    for (interaction, mut color, mut border_color) in &mut interaction_query {
+    for (button_entity, interaction, mut color, mut border_color) in &mut interaction_query {
         match *interaction {
             Interaction::Pressed => {
-                println!("Pressed");
                 *color = PRESSED_BUTTON.into();
                 border_color.0 = Color::RED;
+
+                if let Ok(action) = actions_query.get(button_entity) {
+                    println!("{:?}", action);
+                    actions_writer.send(tick::ActionEvent {
+                        action: action.clone(),
+                    });
+                }
             }
             Interaction::Hovered => {
                 *color = HOVERED_BUTTON.into();

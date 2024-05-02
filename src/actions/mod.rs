@@ -7,6 +7,7 @@ pub enum Action {
     Build(Build),
     KillUnit(Entity),
     Spawn(Spawn),
+    SpawnBasedOnSelectorState(unit::Unit),
     Noop,
 }
 
@@ -55,8 +56,24 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
             commands.entity(unit_entity).despawn();
         }
         Action::Spawn(spawn) => {
-            let unit_bundle = unit::make_bundle(spawn.unit, &unit_resources);
+            let _unit_bundle = unit::make_bundle(spawn.unit, &unit_resources);
+            println!("Not implemented");
         }
+        Action::SpawnBasedOnSelectorState(unit) => match selector_state.selected_tile {
+            Some(tile_entity) => {
+                let tile = tile_query.get(tile_entity).unwrap();
+                println!("tile {:?}", tile_entity);
+
+                let location = tile.location.clone();
+                let unit = unit::Unit { location, ..unit };
+                let unit_bundle = unit::make_bundle(unit, &unit_resources);
+
+                commands.spawn(unit_bundle);
+            }
+            None => {
+                println!("No tile selected")
+            }
+        },
         Action::Noop => {
             println!("Noop")
         }

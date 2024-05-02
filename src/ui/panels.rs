@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use super::button;
-use crate::{actions, building, controls, empire, resource, tile};
+use crate::{actions, building, controls, empire, resource, tile, unit, utils};
 #[derive(Component)]
 pub struct ResourceUi;
 
@@ -77,8 +77,16 @@ fn init_entity_spawner_tab(parent: &mut ChildBuilder) {
         })
         .with_children(|parent| {
             let noop = actions::Action::Noop;
+
             parent
-                .spawn(button::make_button(&noop))
+                .spawn(button::make_button(
+                    &actions::Action::SpawnBasedOnSelectorState(unit::Unit {
+                        kind: unit::UnitKind::Settler(unit::settler::Settler {}),
+                        owner: None,
+                        target: None,
+                        location: utils::Coordinates { x: 0, y: 0 },
+                    }),
+                ))
                 .with_children(|parent| {
                     parent.spawn(button::make_button_text("Settler".to_string()));
                 });

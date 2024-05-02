@@ -65,7 +65,7 @@ pub fn make_bundle(
         MaterialMeshBundle {
             mesh: unit_resources.settler.mesh.clone(),
             material: unit_resources.settler.color.clone(),
-            transform: Transform::from_xyz(x, y, TILE_SIZE as f32 * 1.),
+            transform: Transform::from_xyz(x, y, TILE_SIZE as f32 * 2.),
             ..default()
         },
         unit,
