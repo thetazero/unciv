@@ -80,12 +80,7 @@ fn init_entity_spawner_tab(parent: &mut ChildBuilder) {
 
             parent
                 .spawn(button::make_button(
-                    &actions::Action::SpawnBasedOnSelectorState(unit::Unit {
-                        kind: unit::UnitKind::Settler(unit::settler::Settler {}),
-                        owner: None,
-                        target: None,
-                        location: utils::Coordinates { x: 0, y: 0 },
-                    }),
+                    &actions::Action::SpawnBasedOnSelectorState(unit::UnitKind::Settler(default())),
                 ))
                 .with_children(|parent| {
                     parent.spawn(button::make_button_text("Settler".to_string()));
