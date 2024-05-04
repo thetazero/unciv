@@ -7,10 +7,12 @@ use crate::config::CONFIG;
 use crate::tile::TILE_SIZE;
 use crate::{building, colors, controls, empire, tile, unit, utils};
 
+const WATER_LEVEL: f32 = 0.2;
+
 fn compute_tile_kind(height: f64, biome: f64) -> tile::TileKind {
-    if height < -0.3 {
+    if height < -0.2 {
         return tile::TileKind::Ocean;
-    } else if height < -0.1 {
+    } else if height <= WATER_LEVEL as f64 {
         return tile::TileKind::Shallows;
     } else if height < 0.5 {
         if biome < 0. {
@@ -38,14 +40,14 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
             let x_float = x as f64;
             let y_float = y as f64;
 
-            let height = scaled_simplex_2d(simplex_2d, x_float, y_float, 0.05);
-            let biome = scaled_simplex_2d(simplex_2d, x_float, y_float, 0.02);
+            let height = scaled_simplex_2d(simplex_2d, x_float, y_float, 0.05 / 2.);
+            let biome = scaled_simplex_2d(simplex_2d, x_float, y_float, 0.02 / 2.);
 
             let kind: tile::TileKind = compute_tile_kind(height, biome);
 
             let tile = tile::Tile {
                 location: utils::Coordinates { x, y },
-                height: (height as f32 * TILE_SIZE * 2.).max(0.),
+                height: (height as f32 * TILE_SIZE * 2.).max(WATER_LEVEL * TILE_SIZE * 2.),
                 kind: kind.clone(),
                 owner: None,
                 building: None,

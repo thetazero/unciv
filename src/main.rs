@@ -1,4 +1,5 @@
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
+use bevy::pbr::ClusterConfig;
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
@@ -86,7 +87,7 @@ fn add_resources(
 }
 
 fn setup(mut commands: Commands, mut ambient_light: ResMut<AmbientLight>) {
-    commands.spawn(Camera3dBundle::default());
+    commands.spawn((Camera3dBundle::default(), ClusterConfig::Single));
 
     commands.spawn(DirectionalLightBundle {
         transform: Transform::from_xyz(4.0, 8.0, 4.0).looking_at(Vec3::new(0.1, 0.1, 0.), Vec3::Y),

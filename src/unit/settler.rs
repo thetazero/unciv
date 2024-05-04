@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use super::UnitTrait;
-use crate::{actions, building, tile};
+use crate::{actions, building, colors, tile};
 
 #[derive(Clone, Debug)]
 pub struct Settler {}
@@ -26,10 +26,15 @@ pub fn init_resources<'a, 'b>(
     ResMut<'a, Assets<StandardMaterial>>,
     ResMut<'b, Assets<Mesh>>,
 ) {
-    let mesh = meshes.add(Sphere::new(tile::TILE_SIZE as f32 / 3.0));
+    let cube_mesh = Cuboid::new(
+        tile::TILE_SIZE as f32 / 3.0,
+        tile::TILE_SIZE as f32 / 3.0,
+        tile::TILE_SIZE as f32 / 3.0,
+    );
+    let mesh = meshes.add(cube_mesh);
 
-    let color = materials.add(Color::hsl(0., 0.8, 0.5));
-    let selected_color = materials.add(Color::hsl(0., 0.8, 0.7));
+    let color = materials.add(colors::plastic_material(0., 0.8, 0.5));
+    let selected_color = materials.add(colors::plastic_material(0., 0.8, 0.7));
 
     (
         SettlerResources {
@@ -64,7 +69,7 @@ impl UnitTrait for Settler {
         tile_entity: Entity,
         acting_empire: i32,
     ) -> Vec<actions::Action> {
-        if !tile::is_spawnable(&tile.kind) {
+        if !tile::is_settleable(&tile.kind) {
             println!("Can't build on this tile");
 
             return vec![];

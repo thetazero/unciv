@@ -47,7 +47,7 @@ fn tick_units(
 
         let tile_entity = world_state.tiles.get(&unit.location).unwrap();
         let tile = tiles.get(*tile_entity).unwrap();
-        transform.translation.z = tile.height + TILE_SIZE / 1.;
+        transform.translation.z = tile.height + TILE_SIZE / 2.;
     }
 }
 

@@ -120,6 +120,13 @@ pub fn is_spawnable(kind: &TileKind) -> bool {
     }
 }
 
+pub fn is_settleable(kind: &TileKind) -> bool {
+    match kind {
+        TileKind::Desert | TileKind::Forest | TileKind::Mountain => true,
+        _ => false,
+    }
+}
+
 pub fn is_land(kind: &TileKind) -> bool {
     match kind {
         TileKind::Ocean | TileKind::Shallows => false,

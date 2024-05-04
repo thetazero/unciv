@@ -26,13 +26,13 @@ pub const fn default_config() -> Config {
     Config {
         camera: CameraConfig {
             pan_speed: 1.0,
-            mouse_drag_pan_speed: 0.2,
+            mouse_drag_pan_speed: 0.5,
             mouse_wheel_zoom_speed: 3.0,
             zoom_speed: 0.7,
             max_z: 60.,
             min_z: 2.,
         },
-        world_size: (100, 100),
+        world_size: (200, 200),
         keys: KeyBinds {
             quit: KeyCode::CapsLock,
             zoom_in: KeyCode::Equal,

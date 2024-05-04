@@ -7,6 +7,7 @@ use crate::{
     utils,
 };
 
+pub mod caravan;
 pub mod settler;
 
 #[derive(Component, Clone, Debug)]
@@ -20,6 +21,7 @@ pub struct Unit {
 #[derive(Clone, Debug)]
 pub enum UnitKind {
     Settler(settler::Settler),
+    Caravan(caravan::Caravan),
 }
 
 impl Default for Unit {
@@ -36,6 +38,7 @@ impl Default for Unit {
 #[derive(Resource)]
 pub struct UnitResources {
     pub settler: settler::SettlerResources,
+    pub caravan: caravan::CaravanResources,
 }
 
 pub fn create_resources<'a, 'b>(
@@ -47,8 +50,9 @@ pub fn create_resources<'a, 'b>(
     ResMut<'b, Assets<Mesh>>,
 ) {
     let (settler, materials, meshes) = settler::init_resources(materials, meshes);
+    let (caravan, materials, meshes) = caravan::init_resources(materials, meshes);
 
-    (UnitResources { settler }, materials, meshes)
+    (UnitResources { settler, caravan }, materials, meshes)
 }
 
 pub fn make_bundle(
@@ -115,6 +119,7 @@ pub fn get_selected_material(
 ) -> Handle<StandardMaterial> {
     match &unit.kind {
         UnitKind::Settler(settler) => settler.get_selected_material(unit_resources),
+        UnitKind::Caravan(caravan) => caravan.get_selected_material(unit_resources),
     }
 }
 
@@ -124,6 +129,7 @@ pub fn get_normal_material(
 ) -> Handle<StandardMaterial> {
     match &unit.kind {
         UnitKind::Settler(settler) => settler.get_normal_material(unit_resources),
+        UnitKind::Caravan(caravan) => caravan.get_normal_material(unit_resources),
     }
 }
 
@@ -137,6 +143,9 @@ pub fn tile_action(
     match &unit.kind {
         UnitKind::Settler(settler) => {
             settler.tile_action(tile, unit_entity, tile_entity, acting_empire)
+        }
+        UnitKind::Caravan(caravan) => {
+            caravan.tile_action(tile, unit_entity, tile_entity, acting_empire)
         }
     }
 }
