@@ -2,7 +2,7 @@ use bevy::{prelude::*, utils::HashMap};
 
 use bevy_mod_picking::prelude::*;
 
-use crate::{building, colors::dark_hue, controls, utils};
+use crate::{building, colors, controls, utils};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum TileKind {
@@ -76,14 +76,14 @@ pub fn create_tile_resources<'a, 'b>(
     ResMut<'a, Assets<StandardMaterial>>,
     ResMut<'b, Assets<Mesh>>,
 ) {
-    let empire_red = materials.add(Color::hsl(0.0, 1.0, 0.5));
-    let desert = materials.add(Color::hsl(47., 0.39, 0.39));
-    let forest = materials.add(dark_hue(0.4));
-    let mountain = materials.add(Color::hsl(0.3, 0.1, 0.3));
-    let snowy_mountain = materials.add(Color::hsl(0.3, 0.05, 0.8));
-    let water = materials.add(Color::hsl(200.0, 0.3, 0.5));
-    let ocean = materials.add(Color::hsl(200.0, 0.4, 0.3));
-    let beach = materials.add(Color::hsl(47., 0.29, 0.49));
+    let empire_red = materials.add(colors::plastic_material(0.0, 1.0, 0.5));
+    let desert = materials.add(colors::plastic_material(47., 0.39, 0.39));
+    let forest = materials.add(colors::plastic_material(0.4 * 360., 0.95, 0.2));
+    let mountain = materials.add(colors::plastic_material(0.3, 0.1, 0.3));
+    let snowy_mountain = materials.add(colors::plastic_material(0.3, 0.05, 0.8));
+    let water = materials.add(colors::plastic_material(200.0, 0.3, 0.5));
+    let ocean = materials.add(colors::plastic_material(200.0, 0.4, 0.3));
+    let beach = materials.add(colors::plastic_material(47., 0.29, 0.49));
 
     let square: Handle<Mesh> = meshes.add(Cuboid::new(TILE_SIZE, TILE_SIZE, TILE_SIZE));
 

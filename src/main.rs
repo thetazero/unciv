@@ -1,3 +1,4 @@
+use bevy::core_pipeline::Skybox;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
@@ -89,6 +90,7 @@ fn setup(
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut ambient_light: ResMut<AmbientLight>,
 ) {
     commands.spawn(Camera3dBundle::default());
 
@@ -101,6 +103,9 @@ fn setup(
         },
         ..default()
     });
+
+    ambient_light.color = Color::WHITE;
+    ambient_light.brightness = 500.;
 
     let _background_plane: Handle<Mesh> = meshes.add(Rectangle::new(10000.0, 10000.0));
     let _ocean_dark: Handle<ColorMaterial> = materials.add(Color::hsl(200.0, 0.3, 0.07));
