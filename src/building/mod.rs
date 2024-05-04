@@ -33,13 +33,10 @@ pub struct BuildingResources {
 pub fn create_building_resources<'a>(
     mut materials: ResMut<'a, Assets<StandardMaterial>>,
     asset_server: &Res<AssetServer>,
-) -> (
-    BuildingResources,
-    ResMut<'a, Assets<StandardMaterial>>,
-) {
+) -> (BuildingResources, ResMut<'a, Assets<StandardMaterial>>) {
     let capital_mesh = asset_server.load("capital.glb#Scene0");
     let capital_material = materials.add(capital::Capital::load_material());
-    let city_mesh = asset_server.load("capital.glb#Scene0");
+    let city_mesh = asset_server.load("city.glb#Scene0");
     let city_material = materials.add(city::City::load_material());
 
     let resources = BuildingResources {
@@ -75,7 +72,7 @@ pub fn building_mesh(
         Building::City(city) => city.get_mesh(building_resources),
     };
 
-    let mut transform = Transform::from_xyz(0., 0., TILE_SIZE as f32);
+    let mut transform = Transform::from_xyz(0., 0., TILE_SIZE as f32 / 2.);
 
     transform.scale = Vec3::splat(0.3);
     transform.rotate_local_x(f32::to_radians(90.));
@@ -93,6 +90,6 @@ pub fn make_bundle(
 ) -> (SceneBundle, PickableBundle) {
     (
         building_mesh(building, building_resources),
-        PickableBundle::default(),
+        PickableBundle::default(), // TODO: This does not work
     )
 }
