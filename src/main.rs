@@ -43,10 +43,12 @@ fn main() {
     .add_systems(
         Update,
         ((
-            controls::handle_keyboard,
-            controls::update_selection,
-            controls::handle_drag,
-            controls::handle_mouse_scroll,
+            (
+                controls::handle_keyboard,
+                controls::update_selection,
+                controls::handle_drag,
+                controls::handle_mouse_scroll,
+            ),
             (
                 ui::panels::update_tile_inspector,
                 ui::panels::update_empire_panel,
@@ -106,23 +108,6 @@ fn setup(
 
     ambient_light.color = Color::WHITE;
     ambient_light.brightness = 500.;
-
-    let _background_plane: Handle<Mesh> = meshes.add(Rectangle::new(10000.0, 10000.0));
-    let _ocean_dark: Handle<ColorMaterial> = materials.add(Color::hsl(200.0, 0.3, 0.07));
-
-    // commands.spawn((
-    //     MaterialMesh2dBundle {
-    //         mesh: Mesh2dHandle(background_plane),
-    //         transform: Transform::from_xyz(0.0, 0.0, -1.0),
-    //         material: ocean_dark,
-    //         ..default()
-    //     },
-    //     PickableBundle::default(),
-    //     On::<Pointer<Drag>>::target_component_mut::<Transform>(|drag, transform| {
-    //         transform.translation.x += drag.delta.x; // Make the square follow the mouse
-    //         transform.translation.y -= drag.delta.y;
-    //     }),
-    // ));
 }
 
 #[cfg(test)]
