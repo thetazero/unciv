@@ -62,7 +62,6 @@ struct TileMaterials {
 #[derive(Resource)]
 pub struct TileResources {
     materials: TileMaterials,
-    pub empire_red: Handle<StandardMaterial>,
     pub square: Handle<Mesh>,
 }
 
@@ -76,7 +75,6 @@ pub fn create_tile_resources<'a, 'b>(
     ResMut<'a, Assets<StandardMaterial>>,
     ResMut<'b, Assets<Mesh>>,
 ) {
-    let empire_red = materials.add(colors::plastic_material(0.0, 1.0, 0.5));
     let desert = materials.add(colors::plastic_material(47., 0.39, 0.39));
     let forest = materials.add(colors::plastic_material(0.4 * 360., 0.95, 0.2));
     let mountain = materials.add(colors::plastic_material(0.3, 0.1, 0.3));
@@ -90,7 +88,10 @@ pub fn create_tile_resources<'a, 'b>(
     let mut empire_colors = HashMap::default();
 
     for i in 0..10 {
-        empire_colors.insert(i, materials.add(Color::hsl(i as f32 * 36.0, 0.5, 0.5)));
+        empire_colors.insert(
+            i,
+            materials.add(colors::plastic_material(i as f32 * 36.0, 1.0, 0.3)),
+        );
     }
 
     (
@@ -105,7 +106,6 @@ pub fn create_tile_resources<'a, 'b>(
                 ocean,
                 beach,
             },
-            empire_red,
             square,
         },
         materials,

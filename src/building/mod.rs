@@ -15,7 +15,7 @@ pub enum Building {
 trait BuildingTrait {
     fn production(&self) -> Vec<(resource::Resource, i32)>;
     fn name(&self) -> String;
-    fn get_mesh(&self, building_resources: &Res<BuildingResources>) -> Handle<Mesh>;
+    fn get_mesh(&self, building_resources: &Res<BuildingResources>) -> Handle<Scene>;
     fn get_material(&self, building_resources: &Res<BuildingResources>)
         -> Handle<StandardMaterial>;
     fn load_mesh() -> Mesh;
@@ -24,23 +24,22 @@ trait BuildingTrait {
 
 #[derive(Resource)]
 pub struct BuildingResources {
-    capital_mesh: Handle<Mesh>,
+    capital_mesh: Handle<Scene>,
     capital_material: Handle<StandardMaterial>,
-    city_mesh: Handle<Mesh>,
+    city_mesh: Handle<Scene>,
     city_material: Handle<StandardMaterial>,
 }
 
-pub fn create_building_resources<'a, 'b>(
+pub fn create_building_resources<'a>(
     mut materials: ResMut<'a, Assets<StandardMaterial>>,
-    mut meshes: ResMut<'b, Assets<Mesh>>,
+    asset_server: &Res<AssetServer>,
 ) -> (
     BuildingResources,
     ResMut<'a, Assets<StandardMaterial>>,
-    ResMut<'b, Assets<Mesh>>,
 ) {
-    let capital_mesh = meshes.add(capital::Capital::load_mesh());
+    let capital_mesh = asset_server.load("capital.glb#Scene0");
     let capital_material = materials.add(capital::Capital::load_material());
-    let city_mesh = meshes.add(city::City::load_mesh());
+    let city_mesh = asset_server.load("capital.glb#Scene0");
     let city_material = materials.add(city::City::load_material());
 
     let resources = BuildingResources {
@@ -50,7 +49,7 @@ pub fn create_building_resources<'a, 'b>(
         city_material,
     };
 
-    (resources, materials, meshes)
+    (resources, materials)
 }
 
 pub fn building_production(building: &Building) -> Vec<(resource::Resource, i32)> {
@@ -70,36 +69,30 @@ pub fn building_name(building: &Building) -> String {
 pub fn building_mesh(
     building: &Building,
     building_resources: &Res<BuildingResources>,
-) -> Handle<Mesh> {
-    match building {
+) -> SceneBundle {
+    let scene = match building {
         Building::Capital(capital) => capital.get_mesh(building_resources),
         Building::City(city) => city.get_mesh(building_resources),
-    }
-}
+    };
 
-pub fn building_material(
-    building: &Building,
-    building_resources: &Res<BuildingResources>,
-) -> Handle<StandardMaterial> {
-    match building {
-        Building::Capital(capital) => capital.get_material(building_resources),
-        Building::City(city) => city.get_material(building_resources),
+    let mut transform = Transform::from_xyz(0., 0., TILE_SIZE as f32);
+
+    transform.scale = Vec3::splat(0.3);
+    transform.rotate_local_x(f32::to_radians(90.));
+
+    SceneBundle {
+        scene,
+        transform,
+        ..default()
     }
 }
 
 pub fn make_bundle(
     building: &Building,
     building_resources: &Res<BuildingResources>,
-) -> (MaterialMeshBundle<StandardMaterial>, PickableBundle) {
-    let transform = Transform::from_xyz(0., 0., TILE_SIZE as f32 / 2.);
-
+) -> (SceneBundle, PickableBundle) {
     (
-        MaterialMeshBundle {
-            mesh: building_mesh(building, building_resources),
-            material: building_material(building, building_resources),
-            transform,
-            ..default()
-        },
+        building_mesh(building, building_resources),
         PickableBundle::default(),
     )
 }

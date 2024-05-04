@@ -31,7 +31,7 @@ impl BuildingTrait for City {
         building_resources.city_material.clone()
     }
 
-    fn get_mesh(&self, building_resources: &Res<super::BuildingResources>) -> Handle<Mesh> {
+    fn get_mesh(&self, building_resources: &Res<super::BuildingResources>) -> Handle<Scene> {
         building_resources.city_mesh.clone()
     }
 

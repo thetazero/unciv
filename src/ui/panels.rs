@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use super::button;
-use crate::{actions, building, controls, empire, resource, tile, unit, utils};
+use crate::{actions, building, controls, empire, resource, tile, unit};
 #[derive(Component)]
 pub struct ResourceUi;
 

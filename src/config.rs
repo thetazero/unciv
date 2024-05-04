@@ -30,7 +30,7 @@ pub const fn default_config() -> Config {
             mouse_wheel_zoom_speed: 3.0,
             zoom_speed: 0.7,
             max_z: 60.,
-            min_z: 8.,
+            min_z: 2.,
         },
         world_size: (100, 100),
         keys: KeyBinds {

@@ -6,7 +6,7 @@ use crate::{building, controls, tile, unit, utils};
 pub enum Action {
     Build(Build),
     KillUnit(Entity),
-    Spawn(Spawn),
+    _Spawn(Spawn),
     SpawnBasedOnSelectorState(unit::UnitKind),
     Noop,
 }
@@ -55,7 +55,7 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
 
             commands.entity(unit_entity).despawn();
         }
-        Action::Spawn(spawn) => {
+        Action::_Spawn(spawn) => {
             let _unit_bundle = unit::make_bundle(spawn.unit, &unit_resources);
             println!("Not implemented");
         }

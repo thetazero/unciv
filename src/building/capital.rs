@@ -37,7 +37,7 @@ impl BuildingTrait for Capital {
     fn get_mesh(
         &self,
         building_resources: &Res<super::BuildingResources>,
-    ) -> bevy::prelude::Handle<bevy::prelude::Mesh> {
+    ) -> bevy::prelude::Handle<Scene> {
         building_resources.capital_mesh.clone()
     }
 

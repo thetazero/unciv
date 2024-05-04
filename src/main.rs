@@ -1,4 +1,3 @@
-use bevy::core_pipeline::Skybox;
 use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
@@ -25,9 +24,6 @@ fn main() {
         .add_plugins(FrameTimeDiagnosticsPlugin::default());
 
     // app.insert_resource(DebugPickingMode::Normal);
-
-    // app.add_systems(Startup, ui::setup_fps_counter);
-    // app.add_systems(Update, (ui::fps_text_update_system, ui::fps_counter_showhide));
 
     app.add_systems(
         Startup,
@@ -76,24 +72,20 @@ fn add_resources(
     mut commands: Commands,
     materials: ResMut<Assets<StandardMaterial>>,
     meshes: ResMut<Assets<Mesh>>,
+    asset_server: Res<AssetServer>,
 ) {
     let (tile_resources, materials, meshes) = tile::create_tile_resources(materials, meshes);
     commands.insert_resource(tile_resources);
 
-    let (unit_resources, materials, meshes) = unit::create_resources(materials, meshes);
+    let (unit_resources, materials, _meshes) = unit::create_resources(materials, meshes);
     commands.insert_resource(unit_resources);
 
-    let (building_resources, _materials, _meshes) =
-        building::create_building_resources(materials, meshes);
+    let (building_resources, _materials) =
+        building::create_building_resources(materials, &asset_server);
     commands.insert_resource(building_resources);
 }
 
-fn setup(
-    mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut ambient_light: ResMut<AmbientLight>,
-) {
+fn setup(mut commands: Commands, mut ambient_light: ResMut<AmbientLight>) {
     commands.spawn(Camera3dBundle::default());
 
     commands.spawn(DirectionalLightBundle {
