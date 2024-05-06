@@ -60,7 +60,7 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g, 'h>(
             commands.entity(unit_entity).despawn();
         }
         Action::_Spawn(spawn) => {
-            let _unit_bundle = unit::make_bundle(spawn.unit, &unit_resources, &world_state);
+            let _unit_bundle = unit::make_bundle(spawn.unit, &unit_resources, &world_state.tile_data);
             println!("Not implemented");
         }
         Action::SpawnBasedOnSelectorState(unit_kind) => match selector_state.selected_tile {
@@ -75,7 +75,7 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g, 'h>(
                     kind: unit_kind,
                     moved: true,
                 };
-                let unit_bundle = unit::make_bundle(unit, &unit_resources, &world_state);
+                let unit_bundle = unit::make_bundle(unit, &unit_resources, &world_state.tile_data);
 
                 commands.spawn(unit_bundle);
             }

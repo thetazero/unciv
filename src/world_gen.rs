@@ -163,16 +163,22 @@ pub fn spawn(
     let mut camera_spawn_point = None;
 
     for tile in tile_data.iter() {
+        world_state
+            .tile_data
+            .insert(tile.tile.location, tile.tile.clone());
+
         if tile.owner == Some(0) {
             // TODO: Switch to make_bundle
-            commands = unit::spawn(
-                commands,
-                &unit_resources,
+            let unit_bundle = unit::make_bundle(
                 unit::Unit {
                     location: tile.tile.location,
+                    owner: Some(0),
                     ..Default::default()
                 },
+                &unit_resources,
+                &world_state.tile_data,
             );
+            commands.spawn(unit_bundle);
             camera_spawn_point = Some(utils::to_transform(&tile.tile.location));
         }
 
@@ -182,10 +188,6 @@ pub fn spawn(
         world_state
             .tile_entities
             .insert(tile.tile.location, tile_id);
-
-        world_state
-            .tile_data
-            .insert(tile.tile.location, tile.tile.clone());
 
         if let Some(building) = &tile.building {
             let building_bundle = building::make_bundle(building, &building_resources);
