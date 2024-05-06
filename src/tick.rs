@@ -23,7 +23,7 @@ pub fn init_tick(mut commands: Commands) {
 fn tick_units(
     mut units: Query<(&mut Transform, &mut unit::Unit)>,
     world_state: &ResMut<world_gen::WorldState>,
-    tiles: &Query<&tile::Tile>,
+    tiles: &Query<&tile::TileComponent>,
 ) {
     for res in units.iter_mut() {
         let (mut transform, mut unit) = res;
@@ -47,7 +47,7 @@ fn tick_units(
 
         let tile_entity = world_state.tiles.get(&unit.location).unwrap();
         let tile = tiles.get(*tile_entity).unwrap();
-        transform.translation.z = tile.height + TILE_SIZE / 2.;
+        transform.translation.z = tile.tile.height + TILE_SIZE / 2.;
     }
 }
 
@@ -55,7 +55,7 @@ pub fn execute_actions(
     mut action_reader: EventReader<ActionEvent>,
     mut commands: Commands,
     mut selector_state: ResMut<controls::SelectorState>,
-    mut tile_query: Query<&mut tile::Tile>,
+    mut tile_query: Query<&mut tile::TileComponent>,
     building_resources: Res<building::BuildingResources>,
     unit_resources: Res<unit::UnitResources>,
 ) {
@@ -72,7 +72,7 @@ pub fn execute_actions(
 }
 
 pub fn tick_world(
-    mut tile_query: Query<&tile::Tile>,
+    mut tile_query: Query<&tile::TileComponent>,
     mut empire_query: Query<&mut empire::Empire>,
     time: ResMut<Time>,
     mut tick_state: ResMut<TickState>,
@@ -102,7 +102,7 @@ pub fn tick_world(
                 }
             }
 
-            match tile.kind {
+            match tile.tile.kind {
                 tile::TileKind::Forest => {
                     add_item(empire, resource::Resource::Wood, 1);
                 }

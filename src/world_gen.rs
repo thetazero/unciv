@@ -31,7 +31,7 @@ fn scaled_simplex_2d(simplex: Simplex, x: f64, y: f64, scale: f64) -> f64 {
     simplex.get([x * scale, y * scale])
 }
 
-pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
+pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::TileComponent> {
     let simplex_2d = Simplex::new(2);
 
     let mut tiles = HashMap::new();
@@ -45,15 +45,17 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
 
             let kind: tile::TileKind = compute_tile_kind(height, biome);
 
-            let tile = tile::Tile {
-                location: utils::Coordinates { x, y },
-                height: (height as f32 * TILE_SIZE * 2.).max(WATER_LEVEL * TILE_SIZE * 2.),
-                kind: kind.clone(),
+            let tile = tile::TileComponent {
+                tile: tile::Tile {
+                    location: utils::Coordinates { x, y },
+                    height: (height as f32 * TILE_SIZE * 2.).max(WATER_LEVEL * TILE_SIZE * 2.),
+                    kind: kind.clone(),
+                },
                 owner: None,
                 building: None,
             };
 
-            tiles.insert(tile.location, tile);
+            tiles.insert(tile.tile.location, tile);
         }
     }
 
@@ -62,7 +64,7 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
     for loc in keys.iter() {
         let tile = tiles.get(loc).unwrap();
 
-        if tile::is_land(&tile.kind) {
+        if tile::is_land(&tile.tile.kind) {
             for (x, y) in utils::DIRECTIONS.iter() {
                 if *x == 0 && *y == 0 {
                     continue;
@@ -74,9 +76,9 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
                 };
 
                 if let Some(neighbor) = tiles.get(&neighbor_loc) {
-                    if !tile::is_land(&neighbor.kind) {
+                    if !tile::is_land(&neighbor.tile.kind) {
                         let tile_mut = tiles.get_mut(loc).unwrap();
-                        tile_mut.kind = tile::TileKind::Beach;
+                        tile_mut.tile.kind = tile::TileKind::Beach;
                     }
                 }
             }
@@ -86,7 +88,7 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
     tiles.into_iter().map(|(_, tile)| tile).collect()
 }
 
-fn add_empire_data(tile_data: &mut Vec<tile::Tile>, number_of_empires: i32) {
+fn add_empire_data(tile_data: &mut Vec<tile::TileComponent>, number_of_empires: i32) {
     let mut spawned_empires = 0;
     let mut rng = rand::thread_rng();
 
@@ -94,7 +96,7 @@ fn add_empire_data(tile_data: &mut Vec<tile::Tile>, number_of_empires: i32) {
     while spawned_empires < number_of_empires && max_attempts > 0 {
         let chosen_tile = tile_data.iter_mut().choose(&mut rng).unwrap();
 
-        if tile::is_spawnable(&chosen_tile.kind) && chosen_tile.owner.is_none() {
+        if tile::is_spawnable(&chosen_tile.tile.kind) && chosen_tile.owner.is_none() {
             chosen_tile.owner = Some(spawned_empires);
             chosen_tile.building = Some(building::Building::Capital(default()));
             spawned_empires += 1;
@@ -164,17 +166,17 @@ pub fn spawn(
                 commands,
                 &unit_resources,
                 unit::Unit {
-                    location: tile.location,
+                    location: tile.tile.location,
                     ..Default::default()
                 },
             );
-            camera_spawn_point = Some(utils::to_transform(&tile.location));
+            camera_spawn_point = Some(utils::to_transform(&tile.tile.location));
         }
 
         let tile_bundle = tile::make_bundle(&tile_resources, tile);
         let tile_entity = commands.spawn(tile_bundle);
         let tile_id = tile_entity.id();
-        world_state.tiles.insert(tile.location, tile_id);
+        world_state.tiles.insert(tile.tile.location, tile_id);
 
         if let Some(building) = &tile.building {
             let building_bundle = building::make_bundle(building, &building_resources);

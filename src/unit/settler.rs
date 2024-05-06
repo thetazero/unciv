@@ -64,12 +64,12 @@ impl UnitTrait for Settler {
 
     fn tile_action(
         &self,
-        tile: Mut<tile::Tile>,
+        tile: Mut<tile::TileComponent>,
         unit_entity: Entity,
         tile_entity: Entity,
         acting_empire: i32,
     ) -> Vec<actions::Action> {
-        if !tile::is_settleable(&tile.kind) {
+        if !tile::is_settleable(&tile.tile.kind) {
             println!("Can't build on this tile");
 
             return vec![];

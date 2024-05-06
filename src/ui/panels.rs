@@ -197,9 +197,9 @@ fn init_builder_tab(root: &mut ChildBuilder) {
     });
 }
 
-fn tile_to_string(tile: &tile::Tile) -> String {
-    let kind = tile::tile_string(&tile.kind);
-    format!("{}: ({}, {})", kind, tile.location.x, tile.location.y)
+fn tile_to_string(tile: &tile::TileComponent) -> String {
+    let kind = tile::tile_string(&tile.tile.kind);
+    format!("{}: ({}, {})", kind, tile.tile.location.x, tile.tile.location.y)
 }
 
 pub fn update_tile_inspector(
@@ -212,7 +212,7 @@ pub fn update_tile_inspector(
         &mut Text,
         (With<TileInspectorBuildingList>, Without<TileInspectorTitle>),
     >,
-    tile_query: Query<(Entity, &tile::Tile)>,
+    tile_query: Query<(Entity, &tile::TileComponent)>,
 ) {
     match ui_state.selected_tile {
         Some(entity) => {

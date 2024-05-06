@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use super::UnitTrait;
-use crate::{actions, building, colors, tile};
+use crate::{actions, tile};
 
 #[derive(Clone, Debug)]
 pub struct Caravan {}
@@ -51,7 +51,7 @@ impl UnitTrait for Caravan {
 
     fn tile_action(
         &self,
-        _: Mut<tile::Tile>,
+        _: Mut<tile::TileComponent>,
         _: Entity,
         _: Entity,
         _: i32,

@@ -38,7 +38,7 @@ pub fn handle_keyboard(
     world_state: Res<world_gen::WorldState>,
     mut selector_state: ResMut<SelectorState>,
     unit_query: Query<&unit::Unit>,
-    mut tile_query: Query<&mut tile::Tile>,
+    mut tile_query: Query<&mut tile::TileComponent>,
     building_resources: Res<building::BuildingResources>,
     unit_resources: Res<unit::UnitResources>,
 ) {
@@ -115,7 +115,7 @@ pub fn update_selection(
     mut unit_inspect: EventReader<SelectUnit>,
     mut selector_state: ResMut<SelectorState>,
     mut unit_query: Query<&mut unit::Unit>,
-    tile_query: Query<&tile::Tile>,
+    tile_query: Query<&tile::TileComponent>,
     world_state: Res<world_gen::WorldState>,
     unit_resources: Res<unit::UnitResources>,
 ) {
@@ -133,7 +133,7 @@ pub fn update_selection(
                 if let Some(unit) = selector_state.selected_unit {
                     let mut unit = unit_query.get_mut(unit).unwrap();
 
-                    unit.target = Some(tile.location);
+                    unit.target = Some(tile.tile.location);
                 }
 
                 if let Some(unit_enity) = selector_state.selected_unit {
@@ -253,7 +253,7 @@ pub fn handle_drag(
     time: Res<Time>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     selector_state: Res<SelectorState>,
-    tile_query: Query<&tile::Tile>,
+    tile_query: Query<&tile::TileComponent>,
 ) {
     for ev in drag_events.read() {
         for mut transform in camera.iter_mut() {
@@ -272,7 +272,7 @@ pub fn handle_drag(
                 if let Some(selected_tile) = selector_state.selected_tile {
                     let tile_entity = selected_tile;
                     let tile = tile_query.get(tile_entity).unwrap();
-                    let target_tile_translation = utils::to_transform(&tile.location);
+                    let target_tile_translation = utils::to_transform(&tile.tile.location);
 
                     transform.rotation = transform
                         .looking_at(target_tile_translation.translation, Vec3::Y)

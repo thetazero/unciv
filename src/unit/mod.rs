@@ -106,7 +106,7 @@ trait UnitTrait {
     ) -> Handle<StandardMaterial>;
     fn tile_action(
         &self,
-        tile: Mut<tile::Tile>,
+        tile: Mut<tile::TileComponent>,
         unit_entity: Entity,
         tile_entity: Entity,
         acting_empire: i32,
@@ -135,7 +135,7 @@ pub fn get_normal_material(
 
 pub fn tile_action(
     unit: &Unit,
-    tile: Mut<tile::Tile>,
+    tile: Mut<tile::TileComponent>,
     unit_entity: Entity,
     tile_entity: Entity,
     acting_empire: i32,

@@ -40,12 +40,17 @@ pub fn tile_string(kind: &TileKind) -> String {
 }
 
 #[derive(Component, Clone)]
-pub struct Tile {
-    pub location: utils::Coordinates,
-    pub height: f32,
-    pub kind: TileKind,
+pub struct TileComponent {
     pub owner: Option<i32>,
     pub building: Option<building::Building>,
+    pub tile: Tile,
+}
+
+#[derive(Clone)]
+pub struct Tile {
+    pub location: utils::Coordinates,
+    pub kind: TileKind,
+    pub height: f32,
 }
 
 struct TileMaterials {
@@ -136,9 +141,9 @@ pub fn is_land(kind: &TileKind) -> bool {
 
 pub fn make_bundle(
     tile_resources: &Res<TileResources>,
-    tile: &Tile,
+    tile: &TileComponent,
 ) -> (
-    Tile,
+    TileComponent,
     MaterialMeshBundle<StandardMaterial>,
     PickableBundle,
     On<Pointer<Drag>>,
@@ -151,12 +156,12 @@ pub fn make_bundle(
             .get(&(empire_id % 10))
             .unwrap()
             .clone(),
-        None => tile_material(&tile.kind, &tile_resources),
+        None => tile_material(&tile.tile.kind, &tile_resources),
     };
 
-    let mut tile_location = utils::to_transform(&tile.location);
+    let mut tile_location = utils::to_transform(&tile.tile.location);
 
-    tile_location.translation.z = tile.height;
+    tile_location.translation.z = tile.tile.height;
 
     (
         tile.clone(),

@@ -26,13 +26,13 @@ pub struct Build {
 
 pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
     action: Action,
-    mut tile_query: Query<'a, 'b, &'c mut tile::Tile>,
+    mut tile_query: Query<'a, 'b, &'c mut tile::TileComponent>,
     mut selector_state: ResMut<'d, controls::SelectorState>,
     mut commands: Commands<'f, 'g>,
     building_resources: &Res<building::BuildingResources>,
     unit_resources: &Res<unit::UnitResources>,
 ) -> (
-    Query<'a, 'b, &'c mut tile::Tile>,
+    Query<'a, 'b, &'c mut tile::TileComponent>,
     ResMut<'d, controls::SelectorState>,
     Commands<'f, 'g>,
 ) {
@@ -63,7 +63,7 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
             Some(tile_entity) => {
                 let tile = tile_query.get(tile_entity).unwrap();
 
-                let location = tile.location.clone();
+                let location = tile.tile.location.clone();
                 let unit = unit::Unit {
                     location,
                     owner: Some(0),
