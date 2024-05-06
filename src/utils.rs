@@ -1,5 +1,5 @@
 use bevy::{prelude::*, utils::HashMap};
-use std::ops::AddAssign;
+use std::ops::{Add, AddAssign};
 
 use crate::resource;
 
@@ -13,6 +13,17 @@ impl AddAssign for Coordinates {
     fn add_assign(&mut self, other: Self) {
         self.x += other.x;
         self.y += other.y;
+    }
+}
+
+impl Add for Coordinates {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Coordinates {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
     }
 }
 
@@ -40,8 +51,7 @@ pub const DIRECTIONS: [(i32, i32); 8] = [
     (1, -1),
 ];
 
-
 pub struct Inventory {
     pub items: HashMap<resource::Resource, i32>,
-    pub capacity: i32
+    pub capacity: i32,
 }

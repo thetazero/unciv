@@ -12,26 +12,22 @@ fn tick_units(
 ) {
     for res in units.iter_mut() {
         let (mut transform, mut unit) = res;
+
+        println!("{:?}", unit);
         if let Some(target) = &unit.target {
             if target == &unit.location {
                 unit.target = None;
             } else {
-                let delta = utils::Coordinates {
-                    x: (target.x - unit.location.x).clamp(-1, 1),
-                    y: (target.y - unit.location.y).clamp(-1, 1),
-                };
+                let next_location = unit::next_location(&unit, &world_state);
 
-                unit.location += delta;
+                let (x, y) = utils::to_world_location(&next_location);
+                let z = unit::unit_height(&world_state, &next_location);
 
-                let (x, y) = utils::to_world_location(&unit.location);
-
-                transform.translation.x = x;
-                transform.translation.y = y;
+                unit.location = next_location;
+                transform.translation = Vec3::new(x, y, z);
             }
         }
-
-        let tile_data = world_state.tile_data.get(&unit.location).unwrap();
-        transform.translation.z = tile_data.height + TILE_SIZE / 2.;
+        unit.moved = false;
     }
 }
 

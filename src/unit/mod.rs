@@ -16,6 +16,7 @@ pub struct Unit {
     pub location: utils::Coordinates,
     pub target: Option<utils::Coordinates>,
     pub owner: Option<i32>,
+    pub moved: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -31,6 +32,7 @@ impl Default for Unit {
             location: utils::Coordinates { x: 0, y: 0 },
             target: None,
             owner: None,
+            moved: false,
         }
     }
 }
@@ -150,5 +152,31 @@ pub fn tile_action(
         UnitKind::Caravan(caravan) => {
             caravan.tile_action(tile, unit_entity, tile_entity, acting_empire)
         }
+    }
+}
+
+pub fn unit_height(
+    world_state: &Res<world_gen::WorldState>,
+    coordinates: &utils::Coordinates,
+) -> f32 {
+    return world_state.tile_data.get(coordinates).unwrap().height + TILE_SIZE as f32 / 2.;
+}
+
+// TODO: Do not walk on water
+pub fn next_location(unit: &Unit, _world_state: &Res<world_gen::WorldState>) -> utils::Coordinates {
+    match (unit.target, unit.moved) {
+        (Some(target), false) => {
+            println!("Unit has not moved this turn");
+            let delta = utils::Coordinates {
+                x: (target.x - unit.location.x).clamp(-1, 1),
+                y: (target.y - unit.location.y).clamp(-1, 1),
+            };
+
+            println!("Delta: {:?}", delta);
+
+            unit.location + delta
+        }
+        (_, true) => unit.location,
+        (None, _) => unit.location,
     }
 }

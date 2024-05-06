@@ -73,6 +73,7 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g, 'h>(
                     owner: Some(0),
                     target: None,
                     kind: unit_kind,
+                    moved: true,
                 };
                 let unit_bundle = unit::make_bundle(unit, &unit_resources, &world_state);
 

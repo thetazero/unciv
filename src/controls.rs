@@ -1,4 +1,4 @@
-use bevy::{input::mouse::MouseWheel, prelude::*};
+use bevy::{input::mouse::MouseWheel, prelude::*, transform};
 use bevy_mod_picking::prelude::*;
 
 use crate::{actions, building, config::CONFIG, tick, tile, unit, utils, world_gen};
@@ -117,7 +117,7 @@ pub fn update_selection(
     mut ev_inspect: EventReader<InspectTileEvent>,
     mut unit_inspect: EventReader<SelectUnit>,
     mut selector_state: ResMut<SelectorState>,
-    mut unit_query: Query<&mut unit::Unit>,
+    mut unit_query: Query<(&mut unit::Unit, &mut Transform)>,
     tile_query: Query<&tile::TileComponent>,
     world_state: Res<world_gen::WorldState>,
     unit_resources: Res<unit::UnitResources>,
@@ -134,9 +134,18 @@ pub fn update_selection(
                 }
 
                 if let Some(unit) = selector_state.selected_unit {
-                    let mut unit = unit_query.get_mut(unit).unwrap();
+                    let (mut unit, mut unit_transform) = unit_query.get_mut(unit).unwrap();
 
                     unit.target = Some(tile.tile.location);
+
+                    let next_location = unit::next_location(&unit, &world_state);
+
+                    let (x, y) = utils::to_world_location(&next_location);
+                    let z = unit::unit_height(&world_state, &next_location);
+
+                    unit_transform.translation = Vec3::new(x, y, z);
+                    unit.moved = true;
+                    unit.location = next_location;
                 }
 
                 if let Some(unit_enity) = selector_state.selected_unit {
@@ -182,11 +191,11 @@ pub fn update_selection(
 fn deselect_unit<'a, 'b, 'c>(
     mut commands: Commands<'a, 'b>,
     mut selector_state: ResMut<'c, SelectorState>,
-    unit_query: &Query<&mut unit::Unit>,
+    unit_query: &Query<(&mut unit::Unit, &mut Transform)>,
     unit_entity: Entity,
     unit_resources: &Res<unit::UnitResources>,
 ) -> (Commands<'a, 'b>, ResMut<'c, SelectorState>) {
-    let unit = unit_query.get(unit_entity).unwrap();
+    let (unit, _) = unit_query.get(unit_entity).unwrap();
 
     commands
         .entity(unit_entity)
@@ -200,11 +209,11 @@ fn deselect_unit<'a, 'b, 'c>(
 fn select_unit<'a, 'b, 'c>(
     mut commands: Commands<'a, 'b>,
     mut selector_state: ResMut<'c, SelectorState>,
-    unit_query: &Query<&mut unit::Unit>,
+    unit_query: &Query<(&mut unit::Unit, &mut Transform)>,
     unit_entity: Entity,
     unit_resources: &Res<unit::UnitResources>,
 ) -> (Commands<'a, 'b>, ResMut<'c, SelectorState>) {
-    let unit = unit_query.get(unit_entity).unwrap();
+    let (unit, _) = unit_query.get(unit_entity).unwrap();
 
     commands
         .entity(unit_entity)
