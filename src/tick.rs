@@ -1,24 +1,10 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
-use bevy::time::Stopwatch;
 
 use crate::{
     actions, building, controls, empire, resource,
     tile::{self, TILE_SIZE},
     unit, utils, world_gen,
 };
-
-#[derive(Resource)]
-pub struct TickState {
-    stop_watch: Stopwatch,
-}
-
-pub fn init_tick(mut commands: Commands) {
-    commands.insert_resource(TickState {
-        stop_watch: Stopwatch::new(),
-    })
-}
 
 fn tick_units(
     mut units: Query<(&mut Transform, &mut unit::Unit)>,
@@ -54,16 +40,18 @@ pub fn execute_actions(
     mut commands: Commands,
     mut selector_state: ResMut<controls::SelectorState>,
     mut tile_query: Query<&mut tile::TileComponent>,
+    mut end_turn_writer: EventWriter<EndTurnEvent>,
     building_resources: Res<building::BuildingResources>,
     unit_resources: Res<unit::UnitResources>,
     world_state: Res<world_gen::WorldState>,
 ) {
     for action_event in action_reader.read() {
-        (tile_query, selector_state, commands) = actions::execute(
+        (tile_query, selector_state, commands, end_turn_writer) = actions::execute(
             action_event.action.clone(),
             tile_query,
             selector_state,
             commands,
+            end_turn_writer,
             &building_resources,
             &unit_resources,
             &world_state,
@@ -74,44 +62,38 @@ pub fn execute_actions(
 pub fn tick_world(
     mut tile_query: Query<&tile::TileComponent>,
     mut empire_query: Query<&mut empire::Empire>,
-    time: ResMut<Time>,
-    mut tick_state: ResMut<TickState>,
     world_state: Res<world_gen::WorldState>,
     units: Query<(&mut Transform, &mut unit::Unit)>,
+    mut end_turn_reader: EventReader<EndTurnEvent>,
 ) {
-    tick_state.stop_watch.tick(time.delta());
+    for _ in end_turn_reader.read() {
+        tick_units(units, &world_state);
 
-    if tick_state.stop_watch.elapsed() < Duration::from_secs(1) {
-        return;
-    } else {
-        tick_state.stop_watch.reset();
-    }
+        for tile in tile_query.iter_mut() {
+            if let Some(owner) = tile.owner {
+                let owner_entity = world_state.empires.get(&owner).unwrap();
+                let mut empire: Mut<'_, empire::Empire> =
+                    empire_query.get_mut(owner_entity.clone()).unwrap();
 
-    tick_units(units, &world_state);
-
-    for tile in tile_query.iter_mut() {
-        if let Some(owner) = tile.owner {
-            let owner_entity = world_state.empires.get(&owner).unwrap();
-            let mut empire: Mut<'_, empire::Empire> =
-                empire_query.get_mut(owner_entity.clone()).unwrap();
-
-            if let Some(building) = &tile.building {
-                let production = building::building_production(building);
-                for (resource, amount) in production {
-                    empire = add_item(empire, resource, amount);
+                if let Some(building) = &tile.building {
+                    let production = building::building_production(building);
+                    for (resource, amount) in production {
+                        empire = add_item(empire, resource, amount);
+                    }
                 }
-            }
 
-            match tile.tile.kind {
-                tile::TileKind::Forest => {
-                    add_item(empire, resource::Resource::Wood, 1);
+                match tile.tile.kind {
+                    tile::TileKind::Forest => {
+                        add_item(empire, resource::Resource::Wood, 1);
+                    }
+                    tile::TileKind::Mountain => {
+                        add_item(empire, resource::Resource::Stone, 1);
+                    }
+                    _ => (),
                 }
-                tile::TileKind::Mountain => {
-                    add_item(empire, resource::Resource::Stone, 1);
-                }
-                _ => (),
             }
         }
+        break;
     }
 }
 
@@ -129,3 +111,6 @@ fn add_item<'a>(
 pub struct ActionEvent {
     pub action: actions::Action,
 }
+
+#[derive(Event)]
+pub struct EndTurnEvent;

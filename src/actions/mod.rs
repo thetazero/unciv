@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{building, controls, tile, unit, utils, world_gen};
+use crate::{building, controls, tick, tile, unit, utils, world_gen};
 
 #[derive(Clone, Component, Debug)]
 pub enum Action {
@@ -9,6 +9,7 @@ pub enum Action {
     _Spawn(Spawn),
     SpawnBasedOnSelectorState(unit::UnitKind),
     Noop,
+    EndTurn,
 }
 
 #[derive(Clone, Debug)]
@@ -24,11 +25,12 @@ pub struct Build {
     pub owner: i32,
 }
 
-pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
+pub fn execute<'a, 'b, 'c, 'd, 'f, 'g, 'h>(
     action: Action,
     mut tile_query: Query<'a, 'b, &'c mut tile::TileComponent>,
     mut selector_state: ResMut<'d, controls::SelectorState>,
     mut commands: Commands<'f, 'g>,
+    mut end_turn_writer: EventWriter<'h, tick::EndTurnEvent>,
     building_resources: &Res<building::BuildingResources>,
     unit_resources: &Res<unit::UnitResources>,
     world_state: &Res<world_gen::WorldState>,
@@ -36,6 +38,7 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
     Query<'a, 'b, &'c mut tile::TileComponent>,
     ResMut<'d, controls::SelectorState>,
     Commands<'f, 'g>,
+    EventWriter<'h, tick::EndTurnEvent>,
 ) {
     match action {
         Action::Build(build) => {
@@ -82,7 +85,10 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
         Action::Noop => {
             println!("Noop")
         }
+        Action::EndTurn => {
+            end_turn_writer.send(tick::EndTurnEvent);
+        }
     }
 
-    (tile_query, selector_state, commands)
+    (tile_query, selector_state, commands, end_turn_writer)
 }

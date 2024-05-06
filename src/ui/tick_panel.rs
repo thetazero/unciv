@@ -13,16 +13,15 @@ pub fn init(mut commands: Commands) {
                 top: Val::Px(0.),
                 right: Val::Percent(30.),
                 position_type: PositionType::Absolute,
+                align_content: AlignContent::Center,
                 ..default()
             },
             background_color: Color::rgb(0.1, 0.1, 0.1).into(),
             ..default()
         })
         .with_children(|parent| {
-            let noop = actions::Action::Noop;
-
             parent
-                .spawn(button::make_button(&noop))
+                .spawn(button::make_button(&actions::Action::EndTurn))
                 .with_children(|parent| {
                     parent.spawn(button::make_button_text("End Turn".to_string()));
                 });

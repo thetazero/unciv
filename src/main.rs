@@ -30,7 +30,7 @@ fn main() {
         Startup,
         (
             ui::fps::setup,
-            (setup, add_resources, tick::init_tick),
+            (setup, add_resources),
             world_gen::spawn,
             controls::init_state,
             (ui::panels::init, ui::panels::init_tile_inspector, ui::tick_panel::init),
@@ -65,6 +65,7 @@ fn main() {
     app.add_event::<controls::SelectUnit>();
     app.add_event::<controls::DragEvent>();
     app.add_event::<tick::ActionEvent>();
+    app.add_event::<tick::EndTurnEvent>();
 
     app.run();
 }

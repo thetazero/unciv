@@ -1,7 +1,7 @@
 use bevy::{input::mouse::MouseWheel, prelude::*};
 use bevy_mod_picking::prelude::*;
 
-use crate::{actions, building, config::CONFIG, tile, unit, utils, world_gen};
+use crate::{actions, building, config::CONFIG, tick, tile, unit, utils, world_gen};
 
 #[derive(Resource)]
 pub struct SelectorState {
@@ -41,6 +41,7 @@ pub fn handle_keyboard(
     mut tile_query: Query<&mut tile::TileComponent>,
     building_resources: Res<building::BuildingResources>,
     unit_resources: Res<unit::UnitResources>,
+    mut end_turn_writer: EventWriter<tick::EndTurnEvent>,
 ) {
     if keyboard_input.just_pressed(CONFIG.keys.quit) {
         app_exit_events.send(bevy::app::AppExit);
@@ -89,11 +90,12 @@ pub fn handle_keyboard(
             let actions = unit::tile_action(unit, tile, unit_entity, *tile_entity, 0);
 
             for action in actions {
-                (tile_query, selector_state, commands) = actions::execute(
+                (tile_query, selector_state, commands, end_turn_writer) = actions::execute(
                     action,
                     tile_query,
                     selector_state,
                     commands,
+                    end_turn_writer,
                     &building_resources,
                     &unit_resources,
                     &world_state,

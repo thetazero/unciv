@@ -22,7 +22,6 @@ pub fn button_system(
                 border_color.0 = Color::RED;
 
                 if let Ok(action) = actions_query.get(button_entity) {
-                    println!("{:?}", action);
                     actions_writer.send(tick::ActionEvent {
                         action: action.clone(),
                     });
