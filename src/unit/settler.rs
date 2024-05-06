@@ -76,11 +76,13 @@ impl UnitTrait for Settler {
         }
         match &tile.building {
             None => {
-                let capital = building::Building::City(building::city::City::default());
+                let city = building::Building {
+                    kind: building::BuildingKind::City(default()),
+                };
 
                 vec![
                     actions::Action::Build(actions::Build {
-                        building: capital,
+                        building: city,
                         tile_entity: tile_entity,
                         owner: acting_empire,
                     }),

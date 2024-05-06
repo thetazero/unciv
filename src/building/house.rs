@@ -4,15 +4,15 @@ use super::BuildingTrait;
 use crate::{resource, tile};
 
 #[derive(Clone, Debug)]
-pub struct City {}
+pub struct House {}
 
-impl Default for City {
+impl Default for House {
     fn default() -> Self {
-        City {}
+        House {}
     }
 }
 
-impl BuildingTrait for City {
+impl BuildingTrait for House {
     fn production(&self) -> Vec<(resource::Resource, i32)> {
         vec![
             (resource::Resource::Wood, 1),
@@ -21,7 +21,7 @@ impl BuildingTrait for City {
     }
 
     fn name(&self) -> String {
-        "City".to_string()
+        "House".to_string()
     }
 
     fn get_material(

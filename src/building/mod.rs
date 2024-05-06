@@ -4,12 +4,17 @@ use bevy_mod_picking::PickableBundle;
 use crate::{resource, tile::TILE_SIZE};
 
 pub mod capital;
-pub mod city;
+pub mod house;
 
 #[derive(Clone, Debug)]
-pub enum Building {
+pub struct Building {
+    pub kind: BuildingKind,
+}
+
+#[derive(Clone, Debug)]
+pub enum BuildingKind {
     Capital(capital::Capital),
-    City(city::City),
+    City(house::House),
 }
 
 trait BuildingTrait {
@@ -37,7 +42,7 @@ pub fn create_building_resources<'a>(
     let capital_mesh = asset_server.load("capital.glb#Scene0");
     let capital_material = materials.add(capital::Capital::load_material());
     let city_mesh = asset_server.load("city.glb#Scene0");
-    let city_material = materials.add(city::City::load_material());
+    let city_material = materials.add(house::House::load_material());
 
     let resources = BuildingResources {
         capital_mesh,
@@ -50,16 +55,16 @@ pub fn create_building_resources<'a>(
 }
 
 pub fn building_production(building: &Building) -> Vec<(resource::Resource, i32)> {
-    match building {
-        Building::Capital(capital) => capital.production(),
-        Building::City(city) => city.production(),
+    match &building.kind {
+        BuildingKind::Capital(capital) => capital.production(),
+        BuildingKind::City(city) => city.production(),
     }
 }
 
 pub fn building_name(building: &Building) -> String {
-    match building {
-        Building::Capital(capital) => capital.name(),
-        Building::City(city) => city.name(),
+    match &building.kind {
+        BuildingKind::Capital(capital) => capital.name(),
+        BuildingKind::City(city) => city.name(),
     }
 }
 
@@ -67,9 +72,9 @@ pub fn building_mesh(
     building: &Building,
     building_resources: &Res<BuildingResources>,
 ) -> SceneBundle {
-    let scene = match building {
-        Building::Capital(capital) => capital.get_mesh(building_resources),
-        Building::City(city) => city.get_mesh(building_resources),
+    let scene = match &building.kind {
+        BuildingKind::Capital(capital) => capital.get_mesh(building_resources),
+        BuildingKind::City(city) => city.get_mesh(building_resources),
     };
 
     let mut transform = Transform::from_xyz(0., 0., TILE_SIZE as f32 / 2.);
