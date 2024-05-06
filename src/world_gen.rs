@@ -111,7 +111,8 @@ fn add_empire_data(tile_data: &mut Vec<tile::TileComponent>, number_of_empires: 
 
 #[derive(Resource)]
 pub struct WorldState {
-    pub tiles: HashMap<utils::Coordinates, Entity>,
+    pub tile_entities: HashMap<utils::Coordinates, Entity>,
+    pub tile_data: HashMap<utils::Coordinates, tile::Tile>,
     pub empires: HashMap<i32, Entity>,
 }
 
@@ -124,7 +125,8 @@ pub fn spawn(
     unit_resources: Res<unit::UnitResources>,
 ) {
     let mut world_state = WorldState {
-        tiles: HashMap::new(),
+        tile_entities: HashMap::new(),
+        tile_data: HashMap::new(),
         empires: HashMap::new(),
     };
     const NUMBER_OF_EMPIRES: i32 = 10;
@@ -162,6 +164,7 @@ pub fn spawn(
 
     for tile in tile_data.iter() {
         if tile.owner == Some(0) {
+            // TODO: Switch to make_bundle
             commands = unit::spawn(
                 commands,
                 &unit_resources,
@@ -176,7 +179,13 @@ pub fn spawn(
         let tile_bundle = tile::make_bundle(&tile_resources, tile);
         let tile_entity = commands.spawn(tile_bundle);
         let tile_id = tile_entity.id();
-        world_state.tiles.insert(tile.tile.location, tile_id);
+        world_state
+            .tile_entities
+            .insert(tile.tile.location, tile_id);
+
+        world_state
+            .tile_data
+            .insert(tile.tile.location, tile.tile.clone());
 
         if let Some(building) = &tile.building {
             let building_bundle = building::make_bundle(building, &building_resources);

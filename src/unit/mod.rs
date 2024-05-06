@@ -4,7 +4,7 @@ use bevy_mod_picking::prelude::*;
 use crate::{
     actions, controls,
     tile::{self, TILE_SIZE},
-    utils,
+    utils, world_gen,
 };
 
 pub mod caravan;
@@ -58,6 +58,7 @@ pub fn create_resources<'a, 'b>(
 pub fn make_bundle(
     unit: Unit,
     unit_resources: &Res<UnitResources>,
+    world_state: &Res<world_gen::WorldState>,
 ) -> (
     MaterialMeshBundle<StandardMaterial>,
     Unit,
@@ -65,11 +66,13 @@ pub fn make_bundle(
 ) {
     let (x, y) = utils::to_world_location(&unit.location);
 
+    let z = world_state.tile_data.get(&unit.location).unwrap().height + TILE_SIZE as f32 / 2.;
+
     (
         MaterialMeshBundle {
             mesh: unit_resources.settler.mesh.clone(),
             material: unit_resources.settler.color.clone(),
-            transform: Transform::from_xyz(x, y, TILE_SIZE as f32 * 2.),
+            transform: Transform::from_xyz(x, y, z),
             ..default()
         },
         unit,

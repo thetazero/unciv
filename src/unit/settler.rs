@@ -29,7 +29,7 @@ pub fn init_resources<'a, 'b>(
     let cube_mesh = Cuboid::new(
         tile::TILE_SIZE as f32 / 3.0,
         tile::TILE_SIZE as f32 / 3.0,
-        tile::TILE_SIZE as f32 / 3.0,
+        tile::TILE_SIZE as f32 / 1.5,
     );
     let mesh = meshes.add(cube_mesh);
 

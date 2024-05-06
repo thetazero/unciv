@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{building, controls, tile, unit, utils};
+use crate::{building, controls, tile, unit, utils, world_gen};
 
 #[derive(Clone, Component, Debug)]
 pub enum Action {
@@ -31,6 +31,7 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
     mut commands: Commands<'f, 'g>,
     building_resources: &Res<building::BuildingResources>,
     unit_resources: &Res<unit::UnitResources>,
+    world_state: &Res<world_gen::WorldState>,
 ) -> (
     Query<'a, 'b, &'c mut tile::TileComponent>,
     ResMut<'d, controls::SelectorState>,
@@ -56,7 +57,7 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
             commands.entity(unit_entity).despawn();
         }
         Action::_Spawn(spawn) => {
-            let _unit_bundle = unit::make_bundle(spawn.unit, &unit_resources);
+            let _unit_bundle = unit::make_bundle(spawn.unit, &unit_resources, &world_state);
             println!("Not implemented");
         }
         Action::SpawnBasedOnSelectorState(unit_kind) => match selector_state.selected_tile {
@@ -70,7 +71,7 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g>(
                     target: None,
                     kind: unit_kind,
                 };
-                let unit_bundle = unit::make_bundle(unit, &unit_resources);
+                let unit_bundle = unit::make_bundle(unit, &unit_resources, &world_state);
 
                 commands.spawn(unit_bundle);
             }

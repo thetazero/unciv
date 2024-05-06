@@ -22,8 +22,7 @@ pub fn init_tick(mut commands: Commands) {
 
 fn tick_units(
     mut units: Query<(&mut Transform, &mut unit::Unit)>,
-    world_state: &ResMut<world_gen::WorldState>,
-    tiles: &Query<&tile::TileComponent>,
+    world_state: &Res<world_gen::WorldState>,
 ) {
     for res in units.iter_mut() {
         let (mut transform, mut unit) = res;
@@ -45,9 +44,8 @@ fn tick_units(
             }
         }
 
-        let tile_entity = world_state.tiles.get(&unit.location).unwrap();
-        let tile = tiles.get(*tile_entity).unwrap();
-        transform.translation.z = tile.tile.height + TILE_SIZE / 2.;
+        let tile_data = world_state.tile_data.get(&unit.location).unwrap();
+        transform.translation.z = tile_data.height + TILE_SIZE / 2.;
     }
 }
 
@@ -58,6 +56,7 @@ pub fn execute_actions(
     mut tile_query: Query<&mut tile::TileComponent>,
     building_resources: Res<building::BuildingResources>,
     unit_resources: Res<unit::UnitResources>,
+    world_state: Res<world_gen::WorldState>,
 ) {
     for action_event in action_reader.read() {
         (tile_query, selector_state, commands) = actions::execute(
@@ -67,6 +66,7 @@ pub fn execute_actions(
             commands,
             &building_resources,
             &unit_resources,
+            &world_state,
         );
     }
 }
@@ -76,7 +76,7 @@ pub fn tick_world(
     mut empire_query: Query<&mut empire::Empire>,
     time: ResMut<Time>,
     mut tick_state: ResMut<TickState>,
-    world_state: ResMut<world_gen::WorldState>,
+    world_state: Res<world_gen::WorldState>,
     units: Query<(&mut Transform, &mut unit::Unit)>,
 ) {
     tick_state.stop_watch.tick(time.delta());
@@ -87,7 +87,7 @@ pub fn tick_world(
         tick_state.stop_watch.reset();
     }
 
-    tick_units(units, &world_state, &tile_query);
+    tick_units(units, &world_state);
 
     for tile in tile_query.iter_mut() {
         if let Some(owner) = tile.owner {

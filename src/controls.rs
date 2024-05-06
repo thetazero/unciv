@@ -83,7 +83,7 @@ pub fn handle_keyboard(
         if let Some(unit_entity) = selector_state.selected_unit {
             let unit = unit_query.get(unit_entity).unwrap();
 
-            let tile_entity = world_state.tiles.get(&unit.location).unwrap();
+            let tile_entity = world_state.tile_entities.get(&unit.location).unwrap();
             let tile = tile_query.get_mut(*tile_entity).unwrap();
 
             let actions = unit::tile_action(unit, tile, unit_entity, *tile_entity, 0);
@@ -96,6 +96,7 @@ pub fn handle_keyboard(
                     commands,
                     &building_resources,
                     &unit_resources,
+                    &world_state,
                 );
             }
         }
