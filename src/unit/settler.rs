@@ -76,10 +76,7 @@ impl UnitTrait for Settler {
         }
         match &tile.building {
             None => {
-                let city = building::Building {
-                    kind: building::BuildingKind::City(default()),
-                    ..Default::default()
-                };
+                let city = building::Building::City(default());
 
                 vec![
                     actions::Action::Build(actions::Build {

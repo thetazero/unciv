@@ -7,24 +7,15 @@ pub mod capital;
 pub mod house;
 
 #[derive(Clone, Debug)]
-pub struct Building {
-    pub kind: BuildingKind,
-    pub inventory: HashMap<resource::Resource, u32>,
+pub enum Building {
+    Capital(capital::Capital),
+    City(house::House),
 }
 
 impl Default for Building {
     fn default() -> Self {
-        Building {
-            kind: BuildingKind::Capital(capital::Capital::default()),
-            inventory: HashMap::default(),
-        }
+        Building::Capital(default())
     }
-}
-
-#[derive(Clone, Debug)]
-pub enum BuildingKind {
-    Capital(capital::Capital),
-    City(house::House),
 }
 
 trait BuildingTrait {
@@ -65,16 +56,16 @@ pub fn create_building_resources<'a>(
 }
 
 pub fn building_production(building: &Building) -> Vec<(resource::Resource, i32)> {
-    match &building.kind {
-        BuildingKind::Capital(capital) => capital.production(),
-        BuildingKind::City(city) => city.production(),
+    match building {
+        Building::Capital(capital) => capital.production(),
+        Building::City(city) => city.production(),
     }
 }
 
 pub fn building_name(building: &Building) -> String {
-    match &building.kind {
-        BuildingKind::Capital(capital) => capital.name(),
-        BuildingKind::City(city) => city.name(),
+    match building {
+        Building::Capital(capital) => capital.name(),
+        Building::City(city) => city.name(),
     }
 }
 
@@ -82,9 +73,9 @@ pub fn building_mesh(
     building: &Building,
     building_resources: &Res<BuildingResources>,
 ) -> SceneBundle {
-    let scene = match &building.kind {
-        BuildingKind::Capital(capital) => capital.get_mesh(building_resources),
-        BuildingKind::City(city) => city.get_mesh(building_resources),
+    let scene = match building {
+        Building::Capital(capital) => capital.get_mesh(building_resources),
+        Building::City(city) => city.get_mesh(building_resources),
     };
 
     let mut transform = Transform::from_xyz(0., 0., TILE_SIZE as f32 / 2.);
