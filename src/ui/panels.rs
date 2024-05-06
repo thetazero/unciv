@@ -78,10 +78,12 @@ fn init_entity_spawner_tab(parent: &mut ChildBuilder) {
         .with_children(|parent| {
             let noop = actions::Action::Noop;
 
+            let buy_settler = actions::Action::BuyUnit(actions::BuyUnit {
+                unit_kind: unit::UnitKind::Settler(default()),
+            });
+
             parent
-                .spawn(button::make_button(
-                    &actions::Action::SpawnBasedOnSelectorState(unit::UnitKind::Settler(default())),
-                ))
+                .spawn(button::make_button(&buy_settler))
                 .with_children(|parent| {
                     parent.spawn(button::make_button_text("Settler".to_string()));
                 });
@@ -199,7 +201,10 @@ fn init_builder_tab(root: &mut ChildBuilder) {
 
 fn tile_to_string(tile: &tile::TileComponent) -> String {
     let kind = tile::tile_string(&tile.tile.kind);
-    format!("{}: ({}, {})", kind, tile.tile.location.x, tile.tile.location.y)
+    format!(
+        "{}: ({}, {})",
+        kind, tile.tile.location.x, tile.tile.location.y
+    )
 }
 
 pub fn update_tile_inspector(

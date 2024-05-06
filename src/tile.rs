@@ -2,7 +2,7 @@ use bevy::{prelude::*, utils::HashMap};
 
 use bevy_mod_picking::prelude::*;
 
-use crate::{building, colors, controls, utils};
+use crate::{building, colors, controls, empire, utils};
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum TileKind {
@@ -93,9 +93,10 @@ pub fn create_tile_resources<'a, 'b>(
     let mut empire_colors = HashMap::default();
 
     for i in 0..10 {
+        let empire_hue = empire::id_to_hue(i as i32);
         empire_colors.insert(
             i,
-            materials.add(colors::plastic_material(i as f32 * 36.0, 1.0, 0.3)),
+            materials.add(colors::plastic_material(empire_hue, 1.0, 0.3)),
         );
     }
 

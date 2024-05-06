@@ -14,18 +14,11 @@ impl Default for Settler {
 
 pub struct SettlerResources {
     pub mesh: Handle<Mesh>,
-    pub color: Handle<StandardMaterial>,
-    pub selected_color: Handle<StandardMaterial>,
 }
 
-pub fn init_resources<'a, 'b>(
-    mut materials: ResMut<'a, Assets<StandardMaterial>>,
-    mut meshes: ResMut<'b, Assets<Mesh>>,
-) -> (
-    SettlerResources,
-    ResMut<'a, Assets<StandardMaterial>>,
-    ResMut<'b, Assets<Mesh>>,
-) {
+pub fn init_resources<'a>(
+    mut meshes: ResMut<'a, Assets<Mesh>>,
+) -> (SettlerResources, ResMut<'a, Assets<Mesh>>) {
     let cube_mesh = Cuboid::new(
         tile::TILE_SIZE as f32 / 3.0,
         tile::TILE_SIZE as f32 / 3.0,
@@ -33,35 +26,10 @@ pub fn init_resources<'a, 'b>(
     );
     let mesh = meshes.add(cube_mesh);
 
-    let color = materials.add(colors::plastic_material(0., 0.8, 0.5));
-    let selected_color = materials.add(colors::plastic_material(0., 0.8, 0.7));
-
-    (
-        SettlerResources {
-            mesh,
-            color,
-            selected_color,
-        },
-        materials,
-        meshes,
-    )
+    (SettlerResources { mesh }, meshes)
 }
 
 impl UnitTrait for Settler {
-    fn get_normal_material(
-        &self,
-        unit_resources: &Res<super::UnitResources>,
-    ) -> Handle<StandardMaterial> {
-        return unit_resources.settler.color.clone();
-    }
-
-    fn get_selected_material(
-        &self,
-        unit_resources: &Res<super::UnitResources>,
-    ) -> Handle<StandardMaterial> {
-        return unit_resources.settler.selected_color.clone();
-    }
-
     fn tile_action(
         &self,
         tile: Mut<tile::TileComponent>,

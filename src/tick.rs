@@ -1,10 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{
-    actions, building, controls, empire, resource,
-    tile::{self, TILE_SIZE},
-    unit, utils, world_gen,
-};
+use crate::{actions, building, controls, empire, resource, tile, unit, utils, world_gen};
 
 fn tick_units(
     mut units: Query<(&mut Transform, &mut unit::Unit)>,
@@ -13,7 +9,6 @@ fn tick_units(
     for res in units.iter_mut() {
         let (mut transform, mut unit) = res;
 
-        println!("{:?}", unit);
         if let Some(target) = &unit.target {
             if target == &unit.location {
                 unit.target = None;

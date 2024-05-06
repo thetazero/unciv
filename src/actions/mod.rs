@@ -7,9 +7,14 @@ pub enum Action {
     Build(Build),
     KillUnit(Entity),
     _Spawn(Spawn),
-    SpawnBasedOnSelectorState(unit::UnitKind),
+    BuyUnit(BuyUnit),
     Noop,
     EndTurn,
+}
+
+#[derive(Clone, Debug)]
+pub struct BuyUnit {
+    pub unit_kind: unit::UnitKind,
 }
 
 #[derive(Clone, Debug)]
@@ -40,6 +45,8 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g, 'h>(
     Commands<'f, 'g>,
     EventWriter<'h, tick::EndTurnEvent>,
 ) {
+    println!("Executing action: {:?}", action);
+
     match action {
         Action::Build(build) => {
             let mut tile = tile_query.get_mut(build.tile_entity).unwrap();
@@ -60,10 +67,11 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g, 'h>(
             commands.entity(unit_entity).despawn();
         }
         Action::_Spawn(spawn) => {
-            let _unit_bundle = unit::make_bundle(spawn.unit, &unit_resources, &world_state.tile_data);
+            let _unit_bundle =
+                unit::make_bundle(spawn.unit, &unit_resources, &world_state.tile_data);
             println!("Not implemented");
         }
-        Action::SpawnBasedOnSelectorState(unit_kind) => match selector_state.selected_tile {
+        Action::BuyUnit(buy_action) => match selector_state.selected_tile {
             Some(tile_entity) => {
                 let tile = tile_query.get(tile_entity).unwrap();
 
@@ -72,7 +80,7 @@ pub fn execute<'a, 'b, 'c, 'd, 'f, 'g, 'h>(
                     location,
                     owner: Some(0),
                     target: None,
-                    kind: unit_kind,
+                    kind: buy_action.unit_kind,
                     moved: true,
                 };
                 let unit_bundle = unit::make_bundle(unit, &unit_resources, &world_state.tile_data);

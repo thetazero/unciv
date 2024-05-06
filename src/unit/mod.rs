@@ -2,7 +2,7 @@ use bevy::{prelude::*, utils::HashMap};
 use bevy_mod_picking::prelude::*;
 
 use crate::{
-    actions, controls,
+    actions, colors, controls, empire,
     tile::{self, TILE_SIZE},
     utils, world_gen,
 };
@@ -41,20 +41,43 @@ impl Default for Unit {
 pub struct UnitResources {
     pub settler: settler::SettlerResources,
     pub caravan: caravan::CaravanResources,
+    pub default_materials: Vec<Handle<StandardMaterial>>,
+    pub selected_materials: Vec<Handle<StandardMaterial>>,
 }
 
 pub fn create_resources<'a, 'b>(
-    materials: ResMut<'a, Assets<StandardMaterial>>,
+    mut materials: ResMut<'a, Assets<StandardMaterial>>,
     meshes: ResMut<'b, Assets<Mesh>>,
 ) -> (
     UnitResources,
     ResMut<'a, Assets<StandardMaterial>>,
     ResMut<'b, Assets<Mesh>>,
 ) {
-    let (settler, materials, meshes) = settler::init_resources(materials, meshes);
-    let (caravan, materials, meshes) = caravan::init_resources(materials, meshes);
+    let (settler, meshes) = settler::init_resources(meshes);
+    let (caravan, meshes) = caravan::init_resources(meshes);
 
-    (UnitResources { settler, caravan }, materials, meshes)
+    let mut default_materials = Vec::new();
+    let mut selected_materials = Vec::new();
+
+    for i in 0..10 {
+        let empire_hue = empire::id_to_hue(i as i32);
+        let default = materials.add(colors::plastic_material(empire_hue, 0.5, 0.5));
+        let selected = materials.add(colors::plastic_material(empire_hue, 0.5, 0.3));
+
+        default_materials.push(default);
+        selected_materials.push(selected);
+    }
+
+    (
+        UnitResources {
+            settler,
+            caravan,
+            default_materials,
+            selected_materials,
+        },
+        materials,
+        meshes,
+    )
 }
 
 pub fn make_bundle(
@@ -70,10 +93,12 @@ pub fn make_bundle(
 
     let z = tile_data.get(&unit.location).unwrap().height + TILE_SIZE as f32 / 2.;
 
+    let default_material = get_normal_material(&unit, unit_resources);
+
     (
         MaterialMeshBundle {
             mesh: unit_resources.settler.mesh.clone(),
-            material: unit_resources.settler.color.clone(),
+            material: default_material,
             transform: Transform::from_xyz(x, y, z),
             ..default()
         },
@@ -83,11 +108,6 @@ pub fn make_bundle(
 }
 
 trait UnitTrait {
-    fn get_normal_material(&self, unit_resources: &Res<UnitResources>) -> Handle<StandardMaterial>;
-    fn get_selected_material(
-        &self,
-        unit_resources: &Res<UnitResources>,
-    ) -> Handle<StandardMaterial>;
     fn tile_action(
         &self,
         tile: Mut<tile::TileComponent>,
@@ -101,20 +121,26 @@ pub fn get_selected_material(
     unit: &Unit,
     unit_resources: &Res<UnitResources>,
 ) -> Handle<StandardMaterial> {
-    match &unit.kind {
-        UnitKind::Settler(settler) => settler.get_selected_material(unit_resources),
-        UnitKind::Caravan(caravan) => caravan.get_selected_material(unit_resources),
-    }
+    let owner = unit.owner.unwrap_or(0);
+
+    unit_resources
+        .selected_materials
+        .get(owner as usize)
+        .unwrap()
+        .clone()
 }
 
 pub fn get_normal_material(
     unit: &Unit,
     unit_resources: &Res<UnitResources>,
 ) -> Handle<StandardMaterial> {
-    match &unit.kind {
-        UnitKind::Settler(settler) => settler.get_normal_material(unit_resources),
-        UnitKind::Caravan(caravan) => caravan.get_normal_material(unit_resources),
-    }
+    let owner = unit.owner.unwrap_or(0);
+
+    unit_resources
+        .default_materials
+        .get(owner as usize)
+        .unwrap()
+        .clone()
 }
 
 pub fn tile_action(

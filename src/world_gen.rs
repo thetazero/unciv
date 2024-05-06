@@ -167,19 +167,20 @@ pub fn spawn(
             .tile_data
             .insert(tile.tile.location, tile.tile.clone());
 
-        if tile.owner == Some(0) {
-            // TODO: Switch to make_bundle
+        if let Some(empire_id) = tile.owner {
             let unit_bundle = unit::make_bundle(
                 unit::Unit {
                     location: tile.tile.location,
-                    owner: Some(0),
+                    owner: Some(empire_id),
                     ..Default::default()
                 },
                 &unit_resources,
                 &world_state.tile_data,
             );
             commands.spawn(unit_bundle);
-            camera_spawn_point = Some(utils::to_transform(&tile.tile.location));
+            if empire_id == 0 {
+                camera_spawn_point = Some(utils::to_transform(&tile.tile.location));
+            }
         }
 
         let tile_bundle = tile::make_bundle(&tile_resources, tile);
