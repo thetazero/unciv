@@ -33,7 +33,7 @@ fn main() {
             (setup, add_resources, tick::init_tick),
             world_gen::spawn,
             controls::init_state,
-            (ui::panels::init, ui::panels::init_tile_inspector),
+            (ui::panels::init, ui::panels::init_tile_inspector, ui::tick_panel::init),
         )
             .chain(),
     )
