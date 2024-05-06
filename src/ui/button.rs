@@ -46,7 +46,6 @@ pub fn make_button(action: &actions::Action) -> (ButtonBundle, actions::Action) 
             style: Style {
                 height: Val::Px(30.0),
                 border: UiRect::all(Val::Px(1.0)),
-                margin: UiRect::all(Val::Px(20.0)),
                 // horizontally center child text
                 justify_content: JustifyContent::Center,
                 // vertically center child text
