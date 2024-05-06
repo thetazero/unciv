@@ -1,7 +1,7 @@
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use noise::{NoiseFn, Simplex};
 use rand::seq::IteratorRandom;
-use std::collections::HashMap;
 
 use crate::config::CONFIG;
 use crate::tile::TILE_SIZE;
@@ -75,7 +75,7 @@ pub fn spawn_tile_data(x_count: i32, y_count: i32) -> Vec<tile::Tile> {
 
                 if let Some(neighbor) = tiles.get(&neighbor_loc) {
                     if !tile::is_land(&neighbor.kind) {
-                        let tile_mut = tiles.get_mut(&loc).unwrap();
+                        let tile_mut = tiles.get_mut(loc).unwrap();
                         tile_mut.kind = tile::TileKind::Beach;
                     }
                 }
@@ -97,7 +97,8 @@ fn add_empire_data(tile_data: &mut Vec<tile::Tile>, number_of_empires: i32) {
         if tile::is_spawnable(&chosen_tile.kind) && chosen_tile.owner.is_none() {
             chosen_tile.owner = Some(spawned_empires);
             chosen_tile.building = Some(building::Building {
-                kind: building::BuildingKind::Capital(building::capital::Capital::default()),
+                kind: building::BuildingKind::Capital(default()),
+                ..default()
             });
             spawned_empires += 1;
         }
@@ -143,8 +144,9 @@ pub fn spawn(
                 empire::Empire {
                     id: i as i32,
                     color: color.clone(),
-                    inventory: empire::Inventory {
-                        inv: HashMap::new(),
+                    inventory: utils::Inventory {
+                        items: HashMap::new(),
+                        capacity: 100,
                     },
                 },
                 TransformBundle::default(),

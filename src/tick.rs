@@ -120,8 +120,8 @@ fn add_item<'a>(
     item: resource::Resource,
     amount: i32,
 ) -> Mut<'a, empire::Empire> {
-    let current_amount = empire.inventory.inv.get(&item).unwrap_or(&0).clone();
-    empire.inventory.inv.insert(item, current_amount + amount);
+    let current_amount = empire.inventory.items.get(&item).unwrap_or(&0).clone();
+    empire.inventory.items.insert(item, current_amount + amount);
     return empire;
 }
 

@@ -263,12 +263,12 @@ pub fn update_empire_panel(
                     empire.id,
                     empire
                         .inventory
-                        .inv
+                        .items
                         .get(&resource::Resource::Wood)
                         .unwrap_or(&0),
                     empire
                         .inventory
-                        .inv
+                        .items
                         .get(&resource::Resource::Stone)
                         .unwrap_or(&0),
                 );

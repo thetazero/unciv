@@ -78,6 +78,7 @@ impl UnitTrait for Settler {
             None => {
                 let city = building::Building {
                     kind: building::BuildingKind::City(default()),
+                    ..Default::default()
                 };
 
                 vec![

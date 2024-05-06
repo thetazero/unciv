@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::HashMap};
 use bevy_mod_picking::PickableBundle;
 
 use crate::{resource, tile::TILE_SIZE};
@@ -9,6 +9,16 @@ pub mod house;
 #[derive(Clone, Debug)]
 pub struct Building {
     pub kind: BuildingKind,
+    pub inventory: HashMap<resource::Resource, u32>,
+}
+
+impl Default for Building {
+    fn default() -> Self {
+        Building {
+            kind: BuildingKind::Capital(capital::Capital::default()),
+            inventory: HashMap::default(),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
