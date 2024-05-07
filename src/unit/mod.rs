@@ -171,14 +171,10 @@ pub fn unit_height(
 pub fn next_location(unit: &Unit, _world_state: &Res<world_gen::WorldState>) -> utils::Coordinates {
     match (unit.target, unit.moved) {
         (Some(target), false) => {
-            println!("Unit has not moved this turn");
             let delta = utils::Coordinates {
                 x: (target.x - unit.location.x).clamp(-1, 1),
                 y: (target.y - unit.location.y).clamp(-1, 1),
             };
-
-            println!("Delta: {:?}", delta);
-
             unit.location + delta
         }
         (_, true) => unit.location,
