@@ -48,12 +48,13 @@ pub struct UnitResources {
 pub fn create_resources<'a, 'b>(
     mut materials: ResMut<'a, Assets<StandardMaterial>>,
     meshes: ResMut<'b, Assets<Mesh>>,
+    asset_server: &Res<AssetServer>,
 ) -> (
     UnitResources,
     ResMut<'a, Assets<StandardMaterial>>,
     ResMut<'b, Assets<Mesh>>,
 ) {
-    let (settler, meshes) = settler::init_resources(meshes);
+    let settler = settler::init_resources(asset_server);
     let (caravan, meshes) = caravan::init_resources(meshes);
 
     let mut default_materials = Vec::new();
@@ -95,11 +96,18 @@ pub fn make_bundle(
 
     let default_material = get_normal_material(&unit, unit_resources);
 
+    let mut transform = Transform::from_xyz(x, y, z);
+
+    transform.scale = Vec3::splat(0.3);
+
+    transform.rotate_local_x(f32::to_radians(90.));
+    transform.rotate_local_y(f32::to_radians(180.));
+
     (
         MaterialMeshBundle {
             mesh: unit_resources.settler.mesh.clone(),
             material: default_material,
-            transform: Transform::from_xyz(x, y, z),
+            transform,
             ..default()
         },
         unit,

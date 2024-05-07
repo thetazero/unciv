@@ -16,17 +16,10 @@ pub struct SettlerResources {
     pub mesh: Handle<Mesh>,
 }
 
-pub fn init_resources<'a>(
-    mut meshes: ResMut<'a, Assets<Mesh>>,
-) -> (SettlerResources, ResMut<'a, Assets<Mesh>>) {
-    let cube_mesh = Cuboid::new(
-        tile::TILE_SIZE as f32 / 3.0,
-        tile::TILE_SIZE as f32 / 3.0,
-        tile::TILE_SIZE as f32 / 1.5,
-    );
-    let mesh = meshes.add(cube_mesh);
+pub fn init_resources<'a>(asset_server: &Res<AssetServer>) -> SettlerResources {
+    let mesh = asset_server.load("units/setller.glb#Mesh0/Primitive0");
 
-    (SettlerResources { mesh }, meshes)
+    SettlerResources { mesh }
 }
 
 impl UnitTrait for Settler {
