@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
 mod actions;
+mod animation;
 mod building;
 mod colors;
 mod config;
@@ -33,7 +34,11 @@ fn main() {
             (setup, add_resources),
             world_gen::spawn,
             controls::init_state,
-            (ui::panels::init, ui::panels::init_tile_inspector, ui::tick_panel::init),
+            (
+                ui::panels::init,
+                ui::panels::init_tile_inspector,
+                ui::tick_panel::init,
+            ),
         )
             .chain(),
     )
@@ -57,6 +62,7 @@ fn main() {
             ),
             tick::execute_actions,
             tick::tick_world,
+            animation::translations,
         ))
             .chain(),
     );

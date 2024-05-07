@@ -2,9 +2,9 @@ use bevy::{prelude::*, utils::HashMap};
 use bevy_mod_picking::prelude::*;
 
 use crate::{
-    actions, colors, controls, empire,
+    actions, animation, colors, controls, empire,
     tile::{self, TILE_SIZE},
-    utils, world_gen,
+    unit, utils, world_gen,
 };
 
 pub mod caravan;
@@ -184,4 +184,30 @@ pub fn next_location(unit: &Unit, _world_state: &Res<world_gen::WorldState>) -> 
         (_, true) => unit.location,
         (None, _) => unit.location,
     }
+}
+
+pub fn next_location_update<'a, 'b, 'c>(
+    mut commands: Commands<'b, 'c>,
+    mut unit: Mut<'a, Unit>,
+    time: &Res<Time>,
+    transform: &Transform,
+    unit_entity: &Entity,
+    world_state: &Res<world_gen::WorldState>,
+    next_location: &utils::Coordinates,
+) -> (Commands<'b, 'c>, Mut<'a, Unit>) {
+    let (x, y) = utils::to_world_location(&next_location);
+    let z = unit::unit_height(&world_state, &next_location);
+
+    unit.location = *next_location;
+
+    commands
+        .entity(*unit_entity)
+        .insert(animation::TranslationAnimation {
+            start: transform.translation,
+            end: Vec3::new(x, y, z),
+            start_time: time.elapsed_seconds(),
+            duration: 0.5,
+        });
+
+    (commands, unit)
 }

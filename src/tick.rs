@@ -1,13 +1,15 @@
 use bevy::prelude::*;
 
-use crate::{actions, building, controls, empire, resource, tile, unit, utils, world_gen};
+use crate::{actions, building, controls, empire, resource, tile, unit, world_gen};
 
 fn tick_units(
-    mut units: Query<(&mut Transform, &mut unit::Unit)>,
+    mut commands: Commands,
+    mut units: Query<(Entity, &Transform, &mut unit::Unit)>,
     world_state: &Res<world_gen::WorldState>,
+    time: &Res<Time>,
 ) {
     for res in units.iter_mut() {
-        let (mut transform, mut unit) = res;
+        let (unit_entity, transform, mut unit) = res;
 
         if let Some(target) = &unit.target {
             if target == &unit.location {
@@ -15,11 +17,15 @@ fn tick_units(
             } else {
                 let next_location = unit::next_location(&unit, &world_state);
 
-                let (x, y) = utils::to_world_location(&next_location);
-                let z = unit::unit_height(&world_state, &next_location);
-
-                unit.location = next_location;
-                transform.translation = Vec3::new(x, y, z);
+                (commands, unit) = unit::next_location_update(
+                    commands,
+                    unit,
+                    time,
+                    transform,
+                    &unit_entity,
+                    &world_state,
+                    &next_location,
+                );
             }
         }
         unit.moved = false;
@@ -51,14 +57,16 @@ pub fn execute_actions(
 }
 
 pub fn tick_world(
+    commands: Commands,
     mut tile_query: Query<&tile::TileComponent>,
     mut empire_query: Query<&mut empire::Empire>,
-    world_state: Res<world_gen::WorldState>,
-    units: Query<(&mut Transform, &mut unit::Unit)>,
     mut end_turn_reader: EventReader<EndTurnEvent>,
+    world_state: Res<world_gen::WorldState>,
+    unit_query: Query<(Entity, &Transform, &mut unit::Unit)>,
+    time: Res<Time>,
 ) {
     for _ in end_turn_reader.read() {
-        tick_units(units, &world_state);
+        tick_units(commands, unit_query, &world_state, &time);
 
         for tile in tile_query.iter_mut() {
             if let Some(owner) = tile.owner {
